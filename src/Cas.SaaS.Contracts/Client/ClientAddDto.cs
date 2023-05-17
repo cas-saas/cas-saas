@@ -8,6 +8,16 @@ namespace Cas.SaaS.Contracts.Client;
 public class ClientAddDto
 {
     /// <summary>
+    /// Имя пользователя
+    /// </summary>
+    public string Login { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Пароль пользователя
+    /// </summary>
+    public string Password { get; set; } = string.Empty;
+
+    /// <summary>
     /// Номер телефона пользователя
     /// </summary>
     public string Phone { get; set; } = string.Empty;
@@ -35,7 +45,7 @@ public class ClientAddDto
     /// <summary>
     /// Роль пользователя
     /// </summary>
-    public UserRoles Roles { get; set; }
+    public UserRoles Role { get; set; }
     
     /// <summary>
     /// Статус клиента

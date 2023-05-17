@@ -18,6 +18,10 @@ public class UserDto
     /// Имя пользователя
     /// </summary>
     public string Login { get; set; } = string.Empty;
+    /// <summary>
+    /// ФИО пользователя
+    /// </summary>
+    public string FIO { get; set; } = string.Empty;
 
     /// <summary>
     /// Номер телефона пользователя
