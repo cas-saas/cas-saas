@@ -18,9 +18,17 @@ public class Delivery
     /// </summary>
     public DateTime EndDate { get; set; }
     /// <summary>
+    /// Идентификатор клиента
+    /// </summary>
+    public Guid ClientId { get; set; }
+    /// <summary>
     /// Клиент, который оформил услугу
     /// </summary>
     public virtual Client Client { get; set; } = null!;
+    /// <summary>
+    /// Идентификатор тариф
+    /// </summary>
+    public Guid TariffPlanId { get; set; }
     /// <summary>
     /// Тарифный план услуги
     /// </summary>

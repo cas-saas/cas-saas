@@ -6,4 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Auth\" />
+    <Folder Include="Brigade\" />
+    <Folder Include="Employee\" />
+    <Folder Include="Service\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cas.SaaS.Models\Cas.SaaS.Models.csproj" />
+  </ItemGroup>
+
 </Project>

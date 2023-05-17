@@ -6,18 +6,6 @@
 public class Employee : User
 {
     /// <summary>
-    /// Имя сотрудника
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-    /// <summary>
-    /// Фамилия сотрудника
-    /// </summary>
-    public string Surname { get; set; } = string.Empty;
-    /// <summary>
-    /// Отчество сотрудника
-    /// </summary>
-    public string? Patronymic { get; set; }
-    /// <summary>
     /// Активен ли сотрудник
     /// </summary>
     public bool IsActive { get; set; } = false;
@@ -25,4 +13,8 @@ public class Employee : User
     /// Принадлежность сотрудника к клиенту
     /// </summary>
     public virtual Client Client { get; set; } = null!;
+    /// <summary>
+    /// Наряды сотрудника
+    /// </summary>
+    public virtual IEnumerable<Brigade> Brigades { get; set; } = null!;
 }

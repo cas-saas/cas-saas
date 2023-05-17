@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net6.0": {}
+    "net6.0": {
+      "Cas.SaaS.Models/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "compile": {
+          "bin/placeholder/Cas.SaaS.Models.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Cas.SaaS.Models.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "Cas.SaaS.Models/1.0.0": {
+      "type": "project",
+      "path": "../Cas.SaaS.Models/Cas.SaaS.Models.csproj",
+      "msbuildProject": "../Cas.SaaS.Models/Cas.SaaS.Models.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net6.0": []
+    "net6.0": [
+      "Cas.SaaS.Models >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\pmark\\.nuget\\packages\\": {}
@@ -33,7 +52,11 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\pmark\\Desktop\\Диплом\\Программа\\backend\\src\\Cas.SaaS.Models\\Cas.SaaS.Models.csproj": {
+              "projectPath": "C:\\Users\\pmark\\Desktop\\Диплом\\Программа\\backend\\src\\Cas.SaaS.Models\\Cas.SaaS.Models.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

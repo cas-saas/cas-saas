@@ -32,5 +32,5 @@ public class TariffPlan
     /// <summary>
     /// Заказ
     /// </summary>
-    public virtual Delivery Delivery { get; set; } = null!;
+    public virtual IEnumerable<Delivery> Deliveries { get; set; } = null!;
 }

@@ -6,8 +6,12 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cas.SaaS.Models", "Cas.SaaS.Models\Cas.SaaS.Models.csproj", "{1BB43DA9-8A85-4AC2-B5CF-4BEDAE08D495}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cas.SaaS.API", "Cas.SaaS.API\Cas.SaaS.API.csproj", "{EBD020AC-955D-4C39-9252-C5386C6A13F0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1BB43DA9-8A85-4AC2-B5CF-4BEDAE08D495} = {1BB43DA9-8A85-4AC2-B5CF-4BEDAE08D495}
+		{B271BF75-5DFA-48B1-8E45-63AF3A3E8A1C} = {B271BF75-5DFA-48B1-8E45-63AF3A3E8A1C}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cas.SaaS.Contracts", "Cas.SaaS.Contracts\Cas.SaaS.Contracts.csproj", "{B271BF75-5DFA-48B1-8E45-63AF3A3E8A1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cas.SaaS.Contracts", "Cas.SaaS.Contracts\Cas.SaaS.Contracts.csproj", "{B271BF75-5DFA-48B1-8E45-63AF3A3E8A1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

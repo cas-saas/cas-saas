@@ -14,6 +14,10 @@ public class Brigade
     /// </summary>
     public BrigadeStates Status { get; set; }
     /// <summary>
+    /// Идентификатор услуги
+    /// </summary>
+    public Guid ServiceId { get; set; }
+    /// <summary>
     /// Оказываемая услуга
     /// </summary>
     public virtual Service Service { get; set; } = null!;
