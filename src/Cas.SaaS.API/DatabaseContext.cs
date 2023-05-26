@@ -63,17 +63,6 @@ public class DatabaseContext : DbContext
                 Email = "pmarkelo77@gmail.com",
                 Name = "Павел",
                 Surname = "Маркелов",
-            },
-            new User
-            {
-                Id = Guid.NewGuid(),
-                Role = UserRoles.Client,
-                Login = "client",
-                Password = "client",
-                Phone = "79887774433",
-                Email = "pmarkelo77@gmail.com",
-                Name = "Павел",
-                Surname = "Маркелов",
             });
         });
 
@@ -106,7 +95,7 @@ public class DatabaseContext : DbContext
         {
             entity.Property(e => e.Status).IsRequired();
 
-            entity.HasMany(c => c.Employees).WithOne(e => e.Client);
+            entity.HasMany(c => c.Employees).WithOne(e => e.Client).HasForeignKey(e => e.ClientId);
             entity.HasMany(c => c.Deliveries).WithOne(d => d.Client).HasForeignKey(d => d.ClientId);
             entity.HasMany(c => c.Services).WithOne(s => s.Client).HasForeignKey(s => s.ClientId);
         });
@@ -125,7 +114,7 @@ public class DatabaseContext : DbContext
         {
             entity.Property(e => e.IsActive).IsRequired();
 
-            entity.HasOne(e => e.Client).WithMany(c => c.Employees);
+            entity.HasOne(e => e.Client).WithMany(c => c.Employees).HasForeignKey(e => e.ClientId);
             entity.HasMany(e => e.Brigades).WithMany(b => b.Employees);
         });
 

@@ -8,15 +8,15 @@ public enum ClientStatus
     /// <summary>
     /// Заблокирован
     /// </summary>
-    Blocked,
+    Blocked = 0,
 
     /// <summary>
     /// Оплачен
     /// </summary>
-    Paid,
+    Paid = 1,
 
     /// <summary>
     /// Не оплачен
     /// </summary>
-    NotPaid
+    NotPaid = 2
 }

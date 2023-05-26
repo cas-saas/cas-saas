@@ -1,7 +1,7 @@
 ﻿namespace Cas.SaaS.Models;
 
 /// <summary>
-/// Модель услуг клиента
+/// Модель услуг услуги
 /// </summary>
 public class Service
 {

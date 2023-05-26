@@ -1,5 +1,3 @@
-using Cas.SaaS.Models;
-
 namespace Cas.SaaS.Contracts.Client;
 
 /// <summary>
@@ -41,14 +39,4 @@ public class ClientAddDto
     /// Отчество
     /// </summary>
     public string? Patronymic { get; set; }
-
-    /// <summary>
-    /// Роль пользователя
-    /// </summary>
-    public UserRoles Role { get; set; }
-    
-    /// <summary>
-    /// Статус клиента
-    /// </summary>
-    public ClientStatus Status { get; set; }
 }

@@ -9,10 +9,17 @@ public class Employee : User
     /// Активен ли сотрудник
     /// </summary>
     public bool IsActive { get; set; } = false;
+
     /// <summary>
-    /// Принадлежность сотрудника к клиенту
+    /// Идентификатор клиента
+    /// </summary>
+    public Guid ClientId { get; set; }
+
+    /// <summary>
+    /// Клиент
     /// </summary>
     public virtual Client Client { get; set; } = null!;
+
     /// <summary>
     /// Наряды сотрудника
     /// </summary>

@@ -11,7 +11,12 @@ public class ClientDto
     /// Идентификатор пользователя
     /// </summary>
     public Guid Id { get; set; }
-    
+
+    /// <summary>
+    /// Имя пользователя
+    /// </summary>
+    public string Login { get; set; } = string.Empty;
+
     /// <summary>
     /// Номер телефона пользователя
     /// </summary>
@@ -40,7 +45,7 @@ public class ClientDto
     /// <summary>
     /// Роль пользователя
     /// </summary>
-    public UserRoles Roles { get; set; }
+    public UserRoles Role { get; set; }
 
     /// <summary>
     /// Статус клиента

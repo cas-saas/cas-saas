@@ -8,15 +8,15 @@ public enum UserRoles
     /// <summary>
     /// Клиент
     /// </summary>
-    Client,
+    Client = 0,
 
     /// <summary>
     /// Сотрудник
     /// </summary>
-    Employee,
+    Employee = 1,
 
     /// <summary>
     /// Администратор
     /// </summary>
-    Admin,
+    Admin = 2,
 }

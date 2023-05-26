@@ -1,14 +1,10 @@
-﻿namespace Cas.SaaS.Models;
+﻿namespace Cas.SaaS.Contracts.TariffPlan;
 
 /// <summary>
-/// Тарифный план услуги
+/// Модель добавления тарифа в систему
 /// </summary>
-public class TariffPlan
+public class TariffPlanAddDto
 {
-    /// <summary>
-    /// Идентификатор тарифа
-    /// </summary>
-    public Guid Id { get; set; }
     /// <summary>
     /// Название тарифа
     /// </summary>
@@ -29,8 +25,4 @@ public class TariffPlan
     /// Количество сотрудников в тарифном плане
     /// </summary>
     public int CountEmployees { get; set; }
-    /// <summary>
-    /// Заказы
-    /// </summary>
-    public virtual IEnumerable<Delivery> Deliveries { get; set; } = null!;
 }

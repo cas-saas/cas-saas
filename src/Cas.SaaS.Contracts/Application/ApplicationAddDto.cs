@@ -1,23 +1,22 @@
-﻿namespace Cas.SaaS.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Cas.SaaS.Contracts.Application;
 
 /// <summary>
-/// Заявка на регистрацию в системе
+/// Модель добавления заявки от клиента
 /// </summary>
-public class Application
-{   
-    /// <summary>
-    /// Идентификатор заявки
-    /// </summary>
-    public Guid Id { get; set; }
-
+public class ApplicationAddDto
+{
     /// <summary>
     /// Название организации
     /// </summary>
+    [Required(ErrorMessage = "Необходимо указать название организации к заявке")]
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
     /// Имя клиента
     /// </summary>
+    [Required(ErrorMessage = "Необходимо указать ваше имя к заявке")]
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
@@ -28,20 +27,12 @@ public class Application
     /// <summary>
     /// Контакты для связи
     /// </summary>
+    [Required(ErrorMessage = "Необходимо указать ваш номер телефона к заявке")]
     public string Phone { get; set; } = string.Empty;
 
     /// <summary>
     /// Почтовый адрес для связи
     /// </summary>
+    [Required(ErrorMessage = "Необходимо указать ваш почтовый адрес к заявке")]
     public string Email { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Дата оформления заявки
-    /// </summary>
-    public DateTime CreatedDate { get; set; }
-
-    /// <summary>
-    /// Статус заявки
-    /// </summary>
-    public ApplicationStates Status { get; set; }
 }

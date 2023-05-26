@@ -8,25 +8,25 @@ public enum BrigadeStates
     /// <summary>
     /// Новая
     /// </summary>
-    New,
+    New = 0,
 
     /// <summary>
     /// В работе
     /// </summary>
-    InProgress,
+    InProgress = 1,
 
     /// <summary>
     /// Завершена
     /// </summary>
-    Completed,
+    Completed = 2,
 
     /// <summary>
     /// Отменена клиентом
     /// </summary>
-    CanceledByClient,
+    CanceledByClient = 3,
 
     /// <summary>
     /// Отклонена сотрудником
     /// </summary>
-    RejectedByEmployee,
+    RejectedByEmployee = 4,
 }

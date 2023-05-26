@@ -3,25 +3,25 @@
 /// <summary>
 /// Статус заявки
 /// </summary>
-public enum ApplicationStatus
+public enum ApplicationStates
 {
     /// <summary>
     /// Новая
     /// </summary>
-    New,
+    New = 0,
 
     /// <summary>
     /// Рассматривается
     /// </summary>
-    InProgress,
+    InProgress = 1,
 
     /// <summary>
     /// Отклонена
     /// </summary>
-    Rejected,
+    Rejected = 2,
 
     /// <summary>
     /// Одобрена
     /// </summary>
-    Approved,
+    Approved = 3,
 }

@@ -1,10 +1,12 @@
-﻿namespace Cas.SaaS.Models;
+﻿using Cas.SaaS.Models;
+
+namespace Cas.SaaS.Contracts.Application;
 
 /// <summary>
-/// Заявка на регистрацию в системе
+/// Модель вывода заявки от клиента
 /// </summary>
-public class Application
-{   
+public class ApplicationDto
+{
     /// <summary>
     /// Идентификатор заявки
     /// </summary>

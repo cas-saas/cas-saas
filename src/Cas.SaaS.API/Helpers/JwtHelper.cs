@@ -79,6 +79,7 @@ public class JwtHelper
             new Claim(ClaimsIdentity.DefaultIssuer, user.Id.ToString()),
             new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
             new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.MobilePhone, user.Phone),
         });
 

@@ -50,6 +50,7 @@ public class AuthController : ControllerBase
 
         user.RefreshToken = JwtHelper.CreateRefreshToken();
         user.RefreshTokenExpires = DateTime.UtcNow.AddMinutes(_jwtOptions.Value.RefreshTokenLifetime);
+
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
 
