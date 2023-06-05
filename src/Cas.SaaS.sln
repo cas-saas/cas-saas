@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cas.SaaS.API", "Cas.SaaS.AP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cas.SaaS.Contracts", "Cas.SaaS.Contracts\Cas.SaaS.Contracts.csproj", "{B271BF75-5DFA-48B1-8E45-63AF3A3E8A1C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cas.SaaS.Client", "Cas.SaaS.Front\Cas.SaaS.Client.csproj", "{50188DF9-E877-4D6B-AE71-C2AA6685809E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{B271BF75-5DFA-48B1-8E45-63AF3A3E8A1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B271BF75-5DFA-48B1-8E45-63AF3A3E8A1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B271BF75-5DFA-48B1-8E45-63AF3A3E8A1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50188DF9-E877-4D6B-AE71-C2AA6685809E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50188DF9-E877-4D6B-AE71-C2AA6685809E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50188DF9-E877-4D6B-AE71-C2AA6685809E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50188DF9-E877-4D6B-AE71-C2AA6685809E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

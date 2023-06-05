@@ -121,7 +121,7 @@ public class UsersController : Controller
             return Ok(client);
         }
 
-        var item = new Client
+        var item = new Cas.SaaS.Models.Client
         {
             Id = Guid.NewGuid(),
             Email = clientAddDto.Email,

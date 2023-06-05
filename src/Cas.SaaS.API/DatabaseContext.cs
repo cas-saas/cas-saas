@@ -9,7 +9,7 @@ public class DatabaseContext : DbContext
     #region Tables
     public DbSet<Application> Applications { get; set; } = null!;
     public DbSet<Brigade> Brigades { get; set; } = null!;
-    public DbSet<Client> Clients { get; set; } = null!; 
+    public DbSet<Cas.SaaS.Models.Client> Clients { get; set; } = null!; 
     public DbSet<Delivery> Deliveries { get; set; } = null!;
     public DbSet<Employee> Employees { get; set; } = null!;
     public DbSet<Service> Services { get; set; } = null!;
@@ -91,7 +91,7 @@ public class DatabaseContext : DbContext
             entity.HasMany(b => b.Employees).WithMany(e => e.Brigades);
         });
 
-        modelBuilder.Entity<Client>(entity =>
+        modelBuilder.Entity<Cas.SaaS.Models.Client>(entity =>
         {
             entity.Property(e => e.Status).IsRequired();
 

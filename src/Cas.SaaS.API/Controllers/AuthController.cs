@@ -1,9 +1,11 @@
 ﻿using Cas.SaaS.API.Helpers;
 using Cas.SaaS.API.Options;
 using Cas.SaaS.Contracts.Auth;
+using Cas.SaaS.Contracts.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Cas.SaaS.API.Controllers;
 
@@ -49,7 +51,7 @@ public class AuthController : ControllerBase
         if (user.Password != authDto.Password) return Conflict("Ошибка! Неверный пароль!");
 
         user.RefreshToken = JwtHelper.CreateRefreshToken();
-        user.RefreshTokenExpires = DateTime.UtcNow.AddMinutes(_jwtOptions.Value.RefreshTokenLifetime);
+        user.RefreshTokenExpires = DateTime.UtcNow.AddSeconds(_jwtOptions.Value.RefreshTokenLifetime);
 
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
@@ -59,7 +61,16 @@ public class AuthController : ControllerBase
             AccessToken = _jwtHelper.CreateAccessToken(user, _jwtOptions.Value.AccessTokenLifetime),
             RefreshToken = user.RefreshToken,
         };
-        return Ok(tokens);
+
+        return Ok(new UserLoginResultDTO
+        {
+            Succeeded = true,
+            Token = new TokenDTO
+            {
+                AccessToken = tokens.AccessToken,
+                Expiration = (DateTime)user.RefreshTokenExpires
+            }
+        });
     }
 
     /// <summary>

@@ -1,14 +1,22 @@
-﻿namespace Cas.SaaS.Contracts.Auth;
+﻿using System.ComponentModel.DataAnnotations;
 
+namespace Cas.SaaS.Contracts.Auth;
+
+/// <summary>
+/// Модель авторизации
+/// </summary>
 public class AuthDto
 {
     /// <summary>
     /// Логин пользователя
     /// </summary>
-    public string Login { get; set; } = string.Empty;
+    [Required]
+    public string? Login { get; set; }
 
     /// <summary>
     /// Пароль пользователя
     /// </summary>
-    public string Password { get; set; } = string.Empty;
+    [Required]
+    [DataType(DataType.Password)]
+    public string? Password { get; set; }
 }

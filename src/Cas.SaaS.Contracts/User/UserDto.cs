@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Cas.SaaS.Contracts.User;
 
+/// <summary>
+/// Модель получения пользователей
+/// </summary>
 public class UserDto
 {
     /// <summary>

@@ -1,0 +1,11 @@
+﻿@page "/dashboard"
+@using Microsoft.AspNetCore.Authorization;
+@using Cas.SaaS.Contracts
+@*todo*@
+@attribute [Authorize(Roles = "Client")]
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Dashboard</h1>
+
+<p>Welcome to the dashboard!</p>
