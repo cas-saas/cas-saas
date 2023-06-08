@@ -1,0 +1,111 @@
+﻿@page "/application/create"
+@using Cas.SaaS.Contracts.Application;
+@inject NavigationManager navigationManager
+@inject Helpers.HttpAuthHelper Http
+
+<PageTitle>Отправка заявки</PageTitle>
+
+@if (succeeded)
+{
+    <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Успех!</h4>
+        <p>@applicationResultDTO.Message</p>
+        <hr>
+        <p class="mb-0">Статус заявки можно отслеживать прямо на сайте или Вам придет сообщение на указанный почтовый адрес.</p>
+    </div>
+
+}
+else
+{
+    @if (!status)
+    {
+        <h2>Отправка заявки</h2>
+        <EditForm Model="applicationAddDto" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <form class="border">
+                <div class="form-group p-2">
+                    <div class="form-group">
+                        <label for="title">Название организации</label>
+                        <div>
+                            <InputText class="form-control" id="title" @bind-Value="@applicationAddDto.Title" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Ваше ФИО</label>
+                        <div>
+                            <InputText class="form-control" id="name" @bind-Value="@applicationAddDto.Name" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Номер телефона</label>
+                        <div>
+                            <InputText class="form-control" id="phone" @bind-Value="@applicationAddDto.Phone" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Почтовый адрес</label>
+                        <div>
+                            <InputText class="form-control" id="email" @bind-Value="@applicationAddDto.Email" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Описание</label>
+                        <div>
+                            <InputTextArea class="form-control" id="description" @bind-Value="@applicationAddDto.Description" />
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="form-group m-2">
+                <button class="btn btn-primary" type="submit">Отправить заявку</button>
+                <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+            </div>
+        </EditForm>
+    }
+    else
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    ApplicationAddDto applicationAddDto = new ApplicationAddDto();
+    private static bool succeeded;
+    private bool status;
+    ApplicationResultDTO applicationResultDTO = new ApplicationResultDTO();
+
+    protected async Task OnValidSubmit()
+    {
+        status = true;
+
+        var response = await Http.AddApplicationAsync(applicationAddDto);
+
+        if (response.Succeeded)
+        {
+            applicationResultDTO = response;
+            succeeded = true;
+        }
+        else
+        {
+            var errors = new Dictionary<string, List<string>>();
+            errors.Add("", new List<string> { response.Message });
+        }
+
+        status = false;
+    }
+
+    private void Clear()
+    {
+        applicationAddDto = new ApplicationAddDto();
+    }
+}

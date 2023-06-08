@@ -1,0 +1,183 @@
+﻿@page "/admin/application/{applicationId:guid}"
+@using Cas.SaaS.Contracts.Application;
+@using Cas.SaaS.Models;
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpAdminHelper Http
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Просмотр заявки</PageTitle>
+
+@if (application is null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else if (application.Id == Guid.Empty)
+{
+    <div class="text-center">
+        <p>Данной заявки нет в системе!</p>
+    </div>
+}
+else
+{
+    @if (setstatus)
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h1>
+            Состояние заявки
+            @switch (application.Status)
+            {
+                case Models.ApplicationStates.New:
+                    <span class="badge bg-primary">
+                        Новая
+                    </span>
+                    break;
+
+                case Models.ApplicationStates.InProgress:
+                    <span class="badge bg-warning">
+                        Рассматривается
+                    </span>
+                    break;
+
+                case Models.ApplicationStates.Rejected:
+                    <span class="badge bg-danger">
+                        Отклонена
+                    </span>
+                    break;
+
+                case Models.ApplicationStates.Approved:
+                    <span class="badge bg-success">
+                        Одобрена
+                    </span>
+                    break;
+            }
+        </h1>
+        <div>
+            <dl class="row">
+                <dt class="col-sm-2">
+                    Идентификатор заявки
+                </dt>
+                <dd class="col-sm-10">
+                    @application.Id
+                </dd>
+                <dt class="col-sm-2">
+                    Название организации
+                </dt>
+                <dd class="col-sm-10">
+                    @application.Title
+                </dd>
+                <dt class="col-sm-2">
+                    Имя заказчика
+                </dt>
+                <dd class="col-sm-10">
+                    @application.Name
+                </dd>
+                <dt class="col-sm-2">
+                    Номер телефона
+                </dt>
+                <dd class="col-sm-10">
+                    @application.Phone
+                </dd>
+                <dt class="col-sm-2">
+                    Почтовый адрес
+                </dt>
+                <dd class="col-sm-10">
+                    @application.Email
+                </dd>
+                <dt class="col-sm-2">
+                    Дата создания
+                </dt>
+                <dd class="col-sm-10">
+                    @application.CreatedDate
+                </dd>
+                <dt class="col-sm-3">
+                    Описание
+                </dt>
+                <dd class="col-sm-10">
+                    <div class="p-3 bg-info bg-opacity-10 border border-info border-start-0 rounded-end">
+                        @application.Description
+                    </div>
+                </dd>
+            </dl>
+        </div>
+        <hr />
+        <EditForm Model="applicationStatesEditDto" OnValidSubmit="OnValidSubmit">
+            <div class="card card-body">
+                <h4>Статус заявки</h4>
+                <div>
+                    <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" @bind="applicationStatesEditDto.Status">
+                        <option selected>Выберите статус</option>
+                        @foreach (var c in States)
+                        {
+                            <option value="@c.Key">@c.Value</option>
+                        }
+                    </select>
+                </div>
+                <button class="btn btn-primary m-2" type="submit">Изменить статус</button>
+            </div>
+        </EditForm>
+    }
+}
+
+@code {
+    System.Threading.Timer? timer;
+
+    public Dictionary<int, string> States = new Dictionary<int, string>()
+    {
+        { 0, "Новая" },
+        { 1, "Рассматривается" },
+        { 2, "Отклонена" },
+        { 3, "Одобрена" },
+    };
+
+    private ApplicationDto? application;
+
+    private bool setstatus= false;
+
+    ApplicationStatesEditDto applicationStatesEditDto = new ApplicationStatesEditDto();
+    ApplicationResultDTO applicationResultDTO = new ApplicationResultDTO();
+
+    [Parameter]
+    public Guid applicationId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        timer = new System.Threading.Timer(SetStatus, new System.Threading.AutoResetEvent(false), 1000, 1000);
+    }
+
+    protected async Task OnValidSubmit()
+    {
+        setstatus = true;
+
+        var response = await Http.EditApplicationStateAsync(applicationId, applicationStatesEditDto);
+
+        if (response.Succeeded)
+        {
+            applicationResultDTO = response;
+        }
+        else
+        {
+            var errors = new Dictionary<string, List<string>>();
+            errors.Add("", new List<string> { response.Message });
+        }
+
+        setstatus = false;
+    }
+
+    private async void SetStatus(object stateInfo)
+    {
+        application = await Http.ApplicationIsCheckAsync(applicationId, new ApplicationIsCheckDto());
+        await InvokeAsync(StateHasChanged);
+    }
+}

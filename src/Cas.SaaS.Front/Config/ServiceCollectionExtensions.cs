@@ -6,8 +6,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddAuthorizationCore(config =>
         {
-            config.AddPolicy("Client", policy => policy.RequireClaim("roles", "Client"));
-            config.AddPolicy("Admin", policy => policy.RequireClaim("roles", "Admin"));
+            config.AddPolicy("Client", policy => policy.RequireClaim("role", "Client"));
+            config.AddPolicy("Admin", policy => policy.RequireClaim("role", "Admin"));
         });
 
         return services;

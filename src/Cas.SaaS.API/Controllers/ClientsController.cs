@@ -7,6 +7,9 @@ using System.Data;
 using System.Security.Claims;
 using Cas.SaaS.API.Helpers;
 using Cas.SaaS.Models;
+using Cas.SaaS.Contracts.Client;
+using System.Numerics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Cas.SaaS.API.Controllers;
 
@@ -79,7 +82,7 @@ public class ClientsController : Controller
 
         var delivery = await _context.Deliveries.FirstOrDefaultAsync(item => item.ClientId == clientInfo.GuidId);
         if (delivery is null)
-            return NoContent();
+            return Conflict("Ошибка! Заказ на использование небыл оформлен!");
 
         var currentPlan = await _context.TariffPlans.FirstOrDefaultAsync(item => item.Id == delivery.TariffPlanId);
         if (currentPlan is null) 
@@ -101,7 +104,7 @@ public class ClientsController : Controller
 
             _context.Employees.Update(employee);
             await _context.SaveChangesAsync();
-            return Ok(employee);
+            return Ok();
         }
 
         var client = await _context.Clients.FindAsync(clientInfo.GuidId);
@@ -126,7 +129,7 @@ public class ClientsController : Controller
 
         await _context.Employees.AddAsync(item);
         await _context.SaveChangesAsync();
-        return Ok(item);
+        return Ok();
     }
 
     /// <summary>
@@ -182,7 +185,38 @@ public class ClientsController : Controller
 
         await _context.Services.AddAsync(item);
         await _context.SaveChangesAsync();
-        return Ok(item);
+        return Ok();
+    }
+
+    [Route("GetClient"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClientDto))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetClient()
+    {
+        var clientInfo = GetAuthUserInfo();
+        if (clientInfo is null)
+            return Unauthorized();
+
+        var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == clientInfo.GuidId);
+        if (client is null)
+            return NotFound();
+
+        var clientDto = new ClientDto()
+        {
+            Id = client.Id,
+            Login = client.Login,
+            Phone = client.Phone,
+            Email = client.Email,
+            Name = client.Name,
+            Surname = client.Surname,
+            Patronymic = client.Patronymic,
+            Role = client.Role,
+            Status = client.Status
+        };
+
+        return Ok(clientDto);
     }
 
     #region Claims

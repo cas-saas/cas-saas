@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Cas.SaaS.Contracts.User;
+using System.ComponentModel.DataAnnotations;
 
 namespace Cas.SaaS.Contracts.Application;
 
@@ -16,7 +17,7 @@ public class ApplicationAddDto
     /// <summary>
     /// Имя клиента
     /// </summary>
-    [Required(ErrorMessage = "Необходимо указать ваше имя к заявке")]
+    [Required(ErrorMessage = "Необходимо указать ваше ФИО к заявке")]
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
@@ -35,4 +36,17 @@ public class ApplicationAddDto
     /// </summary>
     [Required(ErrorMessage = "Необходимо указать ваш почтовый адрес к заявке")]
     public string Email { get; set; } = string.Empty;
+}
+
+public class ApplicationResultDTO
+{
+    /// <summary>
+    /// Результат
+    /// </summary>
+    public bool Succeeded { get; set; }
+
+    /// <summary>
+    /// Сообщение сервера
+    /// </summary>
+    public string? Message { get; set; }
 }

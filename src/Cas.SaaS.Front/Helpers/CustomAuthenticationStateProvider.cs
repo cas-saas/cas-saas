@@ -24,7 +24,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
         var tokenDTO = await tokenService.GetToken();
         var identity = string.IsNullOrEmpty(tokenDTO?.AccessToken) || tokenDTO?.Expiration < DateTime.UtcNow
             ? new ClaimsIdentity()
-            : new ClaimsIdentity(ParseClaimsFromJwt(tokenDTO.AccessToken), "jwt", ClaimTypes.Name, "roles");
+            : new ClaimsIdentity(ParseClaimsFromJwt(tokenDTO.AccessToken), "jwt", ClaimTypes.Name, "role");
         return new AuthenticationState(new ClaimsPrincipal(identity));
     }
 
@@ -38,11 +38,27 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
 
     private static byte[] ParseBase64WithoutPadding(string base64)
     {
+        if (String.IsNullOrWhiteSpace(base64)) return null;
+        try
+        {
+            string working = base64.Replace('-', '+').Replace('_', '/'); ;
+            while (working.Length % 4 != 0)
+            {
+                working += '=';
+            }
+            return Convert.FromBase64String(working);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        /*
         switch (base64.Length % 4)
         {
             case 2: base64 += "=="; break;
             case 3: base64 += "="; break;
         }
         return Convert.FromBase64String(base64);
+        */
     }
 }

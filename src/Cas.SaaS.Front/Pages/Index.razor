@@ -1,5 +1,34 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
 
 <PageTitle>Главная страница</PageTitle>
 
-Главная
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            <div class="form-group">
+                <a>@context.User.Identity.Name</a>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="form-group">
+                <div class="mb-3">
+                    <h2>Отправить заявку на пользование системой</h2>
+                </div>
+                <a class="btn btn-success" href="application/create">Отправить заявку</a>
+            </div>
+            <div class="form-group">
+                <div class="mb-3 mt-5">
+                    <h2>Узнать статус заявки</h2>
+                    <label class="form-label">Идентификатор заявки</label>
+                    <input @bind="applicationId" placeholder="0000-0000-0000-0000-0000" class="form-control" />
+                </div>
+                <a class="btn btn-info" href="application/@applicationId">Посмотреть статус заявки</a>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
+
+@code {
+    public string? applicationId { get; set; }
+}

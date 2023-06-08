@@ -1,0 +1,7 @@
+﻿@page "/services"
+@using Cas.SaaS.Contracts.Service;
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpClientHelper Http
+@attribute [Authorize(Roles = "Client")]
+
+<PageTitle>Услуги</PageTitle>

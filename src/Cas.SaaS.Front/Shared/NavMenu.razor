@@ -1,12 +1,11 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
+﻿@using Cas.SaaS.Contracts.Application;
+@using Microsoft.AspNetCore.Components.Authorization
+@inject Helpers.HttpAdminHelper Http
 
 <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
     <div class="container">
         <a class="navbar-brand" href="">CaSaaS</a>
-        <button class="navbar-toggler" type="button" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+        <div class="d-sm-inline-flex flex-sm-row-reverse">
             <AuthorizeView>
                 <Authorized>
                     <ul class="navbar-nav flex-grow-1">
@@ -17,7 +16,7 @@
                         </li>
                         <li class="nav-item">
                             <NavLink class="nav-link text-dark" href="logout">
-                                <span class="oi-account-logout" aria-hidden="true"></span> Выйти из системы
+                                <span class="oi oi-account-logout" aria-hidden="true"></span> Выйти из системы
                             </NavLink>
                         </li>
                     </ul>
@@ -37,20 +36,63 @@
                     </ul>
                 </NotAuthorized>
             </AuthorizeView>
-            
+            <AuthorizeView Roles="Admin">
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="admin/users">
+                            <span class="oi oi-people" aria-hidden="true"></span> Список пользователей
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="admin/applications">
+                            <span class="oi oi-monitor" aria-hidden="true"></span> Список заявок
+                            @if (viewCount != string.Empty)
+                            {
+                                <span class="badge bg-danger m-2">@viewCount</span>
+                            }
+                        </NavLink>
+                    </li>
+                </ul>
+            </AuthorizeView>
+            <AuthorizeView Roles="Client">
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="/employees">
+                            <span class="oi oi-people" aria-hidden="true"></span> Список сотрудников
+                        </NavLink>
+                    </li>
+                </ul>
+            </AuthorizeView>
         </div>
     </div>
 </nav>
 
 @code {
-    bool collapseNavMenu = true;
+    System.Threading.Timer? timer;
+    private string? viewCount { get; set; }
+    private ApplicationResultDTO applicationResultDTO = new ApplicationResultDTO();
+    private static bool isAdmin { get; set; } = true;
 
-    string baseMenuClass = "navbar-collapse d-sm-inline-flex flex-sm-row-reverse";
-
-    string NavMenuCssClass => baseMenuClass + (collapseNavMenu ? " collapse" : "");
-
-    void ToggleNavMenu()
+    protected override async Task OnInitializedAsync()
     {
-        collapseNavMenu = !collapseNavMenu;
+        await base.OnInitializedAsync();
+        timer = new System.Threading.Timer(SetCount, new System.Threading.AutoResetEvent(false), 1000, 1000);
+    }
+
+    private async void SetCount(object stateInfo)
+    {
+        if (isAdmin)
+        {
+            applicationResultDTO = await Http.GetApplicationsIsCheckAsync();
+            if (applicationResultDTO.Succeeded)
+            {
+                if (Convert.ToInt32(applicationResultDTO.Message) > 99) viewCount = "99+";
+                else viewCount = applicationResultDTO.Message;
+                isAdmin = true;
+            }
+            else
+                isAdmin = false;
+        }
+        await InvokeAsync(StateHasChanged);
     }
 }

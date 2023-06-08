@@ -1,0 +1,90 @@
+﻿@page "/application/{applicationId:guid}"
+@using Cas.SaaS.Contracts.Application;
+@inject NavigationManager navigationManager
+@inject Helpers.HttpAuthHelper Http
+
+<PageTitle>Детали заявки</PageTitle>
+
+@if (application is null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else if (application.Id == Guid.Empty)
+{
+    <div class="text-center">
+        <p>Данной заявки нет в системе!</p>
+    </div>
+}
+else
+{
+    <div>
+        <dl class="row">
+            <dt class="col-sm-2">
+                Идентификатор заявки
+            </dt>
+            <dd class="col-sm-10">
+                @application.Id
+            </dd>
+            <dt class="col-sm-2">
+                Статус заявки
+            </dt>
+            <dd class="col-sm-10">
+                @application.Status
+            </dd>
+            <dt class="col-sm-2">
+                Название организации
+            </dt>
+            <dd class="col-sm-10">
+                @application.Title
+            </dd>
+            <dt class="col-sm-2">
+                Имя заказчика
+            </dt>
+            <dd class="col-sm-10">
+                @application.Name
+            </dd>
+            <dt class="col-sm-2">
+                Номер телефона
+            </dt>
+            <dd class="col-sm-10">
+                @application.Phone
+            </dd>
+            <dt class="col-sm-2">
+                Почтовый адрес
+            </dt>
+            <dd class="col-sm-10">
+                @application.Email
+            </dd>
+            <dt class="col-sm-2">
+                Дата создания
+            </dt>
+            <dd class="col-sm-10">
+                @application.CreatedDate
+            </dd>
+            <dt class="col-sm-3">
+                Описание
+            </dt>
+            <dd class="col-sm-10">
+                <div class="p-3 bg-info bg-opacity-10 border border-info border-start-0 rounded-end">
+                    @application.Description
+                </div>
+            </dd>
+        </dl>
+    </div>
+}
+
+@code {
+    private ApplicationDto? application;
+
+    [Parameter]
+    public Guid applicationId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        application = await Http.GetApplicationByIdAsync(applicationId);
+    }
+}

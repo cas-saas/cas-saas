@@ -14,7 +14,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+builder.Services.AddHttpClient<HttpAuthHelper>(auth => auth.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 builder.Services.AddHttpClient<HttpClientHelper>(client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+builder.Services.AddHttpClient<HttpAdminHelper>(admin => admin.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 // builder.Services.AddAuthorizationCore();
 builder.Services.AddPolicies();

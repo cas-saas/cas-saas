@@ -1,0 +1,70 @@
+﻿@page "/admin/user/create"
+@using Cas.SaaS.Contracts.Client;
+@inject NavigationManager navigationManager
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpAdminHelper Http
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Добавление клиента</PageTitle>
+
+﻿<EditForm Model="clientAddDto" OnValidSubmit="OnValidSubmit">
+
+    <div class="form-group p-2">
+        <label for="name">Имя</label>
+        <div>
+            <InputText class="form-control" id="name" @bind-Value="@clientAddDto.Name" />
+        </div>
+
+        <label for="surname">Фамилия</label>
+        <div>
+            <InputText class="form-control" id="surname" @bind-Value="@clientAddDto.Surname" />
+        </div>
+
+        <label for="patronymic">Отчество</label>
+        <div>
+            <InputText class="form-control" id="patronymic" @bind-Value="@clientAddDto.Patronymic" />
+        </div>
+
+        <label for="email">Почтовый адрес</label>
+        <div>
+            <InputText class="form-control" id="email" @bind-Value="@clientAddDto.Email" />
+        </div>
+
+        <label for="phone">Номер телефона</label>
+        <div>
+            <InputText class="form-control" id="phone" @bind-Value="@clientAddDto.Phone" />
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Добавить</button>
+    <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+
+</EditForm>
+
+@code {
+    ClientAddDto clientAddDto = new ClientAddDto();
+
+    protected async Task OnValidSubmit()
+    {
+        var response = await Http.AddClientAsync(clientAddDto);
+
+        var body = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
+        {
+            // success
+            Console.WriteLine($"the id of the user is: {body}");
+            navigationManager.NavigateTo("/admin/users");
+        }
+        else
+        {
+            // not success
+            Console.WriteLine(body);
+        }
+    }
+
+    private void Clear()
+    {
+        clientAddDto = new ClientAddDto();
+    }
+}

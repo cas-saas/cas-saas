@@ -42,6 +42,7 @@ public class AuthController : ControllerBase
     /// <param name="authDto">Данные по пользователю</param>
     /// <returns>Токены</returns>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Auth([FromBody] AuthDto authDto)
     {
         var user = await _context.Users.FirstOrDefaultAsync(item => item.Login == authDto.Login);

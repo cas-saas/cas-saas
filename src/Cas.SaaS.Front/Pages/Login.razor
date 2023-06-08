@@ -1,6 +1,6 @@
 ﻿@page "/login"
 @using Cas.SaaS.Contracts.User
-@inject Helpers.HttpClientHelper Http
+@inject Helpers.HttpAuthHelper Http
 @inject NavigationManager NavigationManager
 
 <PageTitle>Вход в систему</PageTitle>
@@ -13,14 +13,14 @@
             <div class="card">
                 <div class="card-header">Вход</div>
                 <div class="card-body">
-                    <div class="form-group row">
+                    <div class="form-group row p-2">
                         <label class="col-md-4 col-form-label text-md-right">Логин</label>
                         <div class="col-md-6">
                             <InputText class="form-control" id="Login" @bind-Value="userLoginDTO.Login" placeholder="Логин" />
                         </div>
                     </div>
 
-                    <div class="form-group row">
+                    <div class="form-group row p-2">
                         <label class="col-md-4 col-form-label text-md-right">Пароль</label>
                         <div class="col-md-6">
                             <InputText class="form-control" id="Password" @bind-Value="userLoginDTO.Password" placeholder="Пароль" />
@@ -28,7 +28,7 @@
                     </div>
                     @if (!loggingIn)
                     {
-                        <div class="col-md-6 offset-md-4">
+                        <div class="col-md-6 offset-md-4 p-4">
                             <button type="submit" class="btn btn-primary">
                                 Войти
                             </button>
@@ -39,9 +39,11 @@
                     }
                     else
                     {
-                        <p>
-                            Вход в систему...
-                        </p>
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                        </div>
                     }
                 </div>
             </div>
@@ -61,7 +63,7 @@
 
         if (result.Succeeded)
         {
-            NavigationManager.NavigateTo("dashboard");
+            NavigationManager.NavigateTo("/");
         }
         else
         {

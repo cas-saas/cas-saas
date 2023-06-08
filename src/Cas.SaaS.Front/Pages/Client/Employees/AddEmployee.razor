@@ -1,0 +1,70 @@
+﻿@page "/employee/create"
+@using Cas.SaaS.Contracts.Employee;
+@using Microsoft.AspNetCore.Authorization;
+@inject NavigationManager navigationManager
+@inject Helpers.HttpClientHelper Http
+@attribute [Authorize(Roles = "Client")]
+
+<PageTitle>Добавление сотрудника</PageTitle>
+
+﻿<EditForm Model="employeeAddDto" OnValidSubmit="OnValidSubmit">
+
+    <div class="form-group p-2">
+        <label for="name">Имя</label>
+        <div>
+            <InputText class="form-control" id="name" @bind-Value="@employeeAddDto.Name" />
+        </div>
+
+        <label for="surname">Фамилия</label>
+        <div>
+            <InputText class="form-control" id="surname" @bind-Value="@employeeAddDto.Surname" />
+        </div>
+
+        <label for="patronymic">Отчество</label>
+        <div>
+            <InputText class="form-control" id="patronymic" @bind-Value="@employeeAddDto.Patronymic" />
+        </div>
+
+        <label for="email">Почтовый адрес</label>
+        <div>
+            <InputText class="form-control" id="email" @bind-Value="@employeeAddDto.Email" />
+        </div>
+
+        <label for="phone">Номер телефона</label>
+        <div>
+            <InputText class="form-control" id="phone" @bind-Value="@employeeAddDto.Phone" />
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Добавить</button>
+    <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+
+</EditForm>
+
+@code {
+    EmployeeAddDto employeeAddDto = new EmployeeAddDto();
+
+    protected async Task OnValidSubmit()
+    {
+        var response = await Http.AddEmployeeAsync(employeeAddDto);
+
+        var body = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
+        {
+            // success
+            Console.WriteLine($"the id of the user is: {body}");
+            navigationManager.NavigateTo("employees");
+        }
+        else
+        {
+            // not success
+            Console.WriteLine(body);
+        }
+    }
+
+    private void Clear()
+    {
+        employeeAddDto = new EmployeeAddDto();
+    }
+}

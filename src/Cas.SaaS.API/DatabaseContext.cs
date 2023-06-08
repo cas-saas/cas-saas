@@ -76,6 +76,7 @@ public class DatabaseContext : DbContext
             entity.Property(e => e.Email).IsRequired();
             entity.Property(e => e.CreatedDate).IsRequired();
             entity.Property(e => e.Status).IsRequired();
+            entity.Property(e => e.IsCheck).IsRequired();
         });
 
         modelBuilder.Entity<Brigade>(entity =>

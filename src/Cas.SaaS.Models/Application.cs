@@ -44,4 +44,9 @@ public class Application
     /// Статус заявки
     /// </summary>
     public ApplicationStates Status { get; set; }
+
+    /// <summary>
+    /// Была ли просмотренна заявка
+    /// </summary>
+    public bool IsCheck { get; set; } = false;
 }

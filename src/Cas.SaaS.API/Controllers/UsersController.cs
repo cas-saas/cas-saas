@@ -118,7 +118,7 @@ public class UsersController : Controller
 
             _context.Clients.Update(client);
             await _context.SaveChangesAsync();
-            return Ok(client);
+            return Ok(client.Id);
         }
 
         var item = new Cas.SaaS.Models.Client
@@ -136,7 +136,7 @@ public class UsersController : Controller
 
         await _context.Clients.AddAsync(item);
         await _context.SaveChangesAsync();
-        return Ok(item);
+        return Ok(item.Id);
     }
 
     /// <summary>
@@ -181,7 +181,7 @@ public class UsersController : Controller
 
         await _context.TariffPlans.AddAsync(item);
         await _context.SaveChangesAsync();
-        return Ok(item);
+        return Ok(item.Id);
     }
 
     /// <summary>
@@ -238,6 +238,6 @@ public class UsersController : Controller
 
         await _context.Deliveries.AddAsync(item);
         await _context.SaveChangesAsync();
-        return Ok(item);
+        return Ok(item.Id);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Cas.SaaS.API.Helpers;
+using Cas.SaaS.API.Services;
 using Cas.SaaS.Contracts.Application;
 using Cas.SaaS.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +15,7 @@ public class ApplicationsController : Controller
 {
     private readonly DatabaseContext _context;
     private readonly JwtHelper _jwtHelper;
+    private readonly EmailSenderService _emailSenderService;
     private readonly ILogger<ApplicationsController> _logger;
 
     /// <summary>
@@ -23,10 +25,11 @@ public class ApplicationsController : Controller
     /// <param name="logger">Логгер</param>
     /// <param name="jwtReader">Расшифровщик данных пользователя из JWT</param>
     /// <exception cref="ArgumentNullException">Аргумент не инициализирован</exception>
-    public ApplicationsController(DatabaseContext context, JwtHelper jwtHelper, ILogger<ApplicationsController> logger)
+    public ApplicationsController(DatabaseContext context, JwtHelper jwtHelper, EmailSenderService emailSenderService, ILogger<ApplicationsController> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _jwtHelper = jwtHelper ?? throw new ArgumentNullException(nameof(jwtHelper));
+        _emailSenderService = emailSenderService ?? throw new ArgumentNullException(nameof(emailSenderService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -57,13 +60,54 @@ public class ApplicationsController : Controller
             Phone = applicationAddDto.Phone,
             Email = applicationAddDto.Email,
             CreatedDate = DateTime.UtcNow,
-            Status = ApplicationStates.New
+            Status = ApplicationStates.New,
+            IsCheck = false
         };
+
+        await _emailSenderService.SendStatus(application);
 
         await _context.Applications.AddAsync(application);
         await _context.SaveChangesAsync();
 
-        return Ok(application.Id);
+        var resultApplication = new ApplicationResultDTO
+        {
+            Succeeded = true,
+            Message = $"Заявка №{application.Id} успешно создана!"
+        };
+
+        return Ok(resultApplication);
+    }
+
+    /// <summary>
+    /// Получить заявку по идентификатору
+    /// </summary>
+    /// <param name="state">Состояние заявки</param>
+    /// <response code="200">Список всех заявок</response>
+    /// <response code="401">Токен доступа истек</response>
+    /// <response code="500">Ошибка сервера</response>
+    [Route("GetApplications/{id:guid}"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationDto))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplications(Guid id)
+    {
+        var application = await _context.Applications.FirstOrDefaultAsync(x => x.Id == id);
+        if (application is null)
+            return BadRequest();
+
+        var applicationDto = new ApplicationDto
+        {
+            Id = application.Id,
+            Title = application.Title,
+            Name = application.Name,
+            Description = application.Description,
+            Phone = application.Phone,
+            Email = application.Email,
+            CreatedDate = application.CreatedDate,
+            Status = application.Status,
+            IsCheck = application.IsCheck
+        };
+        return Ok(applicationDto);
     }
 
     #endregion
@@ -94,36 +138,9 @@ public class ApplicationsController : Controller
                 Phone = application.Phone,
                 Email = application.Email,
                 CreatedDate = application.CreatedDate,
-                Status = application.Status
-            }).ToListAsync());
-    }
-
-    /// <summary>
-    /// Получить заявку по идентификатору
-    /// </summary>
-    /// <param name="state">Состояние заявки</param>
-    /// <response code="200">Список всех заявок</response>
-    /// <response code="401">Токен доступа истек</response>
-    /// <response code="500">Ошибка сервера</response>
-    [Route("GetApplications/{id:guid}"), HttpGet]
-    [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ApplicationDto>))]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetApplications(Guid id)
-    {
-        return Ok(await _context.Applications.Where(item => item.Id == id)
-            .Select(application => new ApplicationDto
-            {
-                Id = application.Id,
-                Title = application.Title,
-                Name = application.Name,
-                Description = application.Description,
-                Phone = application.Phone,
-                Email = application.Email,
-                CreatedDate = application.CreatedDate,
-                Status = application.Status
-            }).ToListAsync());
+                Status = application.Status,
+                IsCheck = application.IsCheck
+            }).OrderBy(x => x.IsCheck).ToListAsync());
     }
 
     /// <summary>
@@ -160,6 +177,46 @@ public class ApplicationsController : Controller
             return Conflict("Невозможно изменить статус заявки, потому что она была отклонена!");
 
         application.Status = applicationStatesEditDto.Status;
+
+        await _emailSenderService.SendEditStatus(application);
+
+        _context.Applications.Update(application);
+        await _context.SaveChangesAsync();
+
+        var resultApplication = new ApplicationResultDTO
+        {
+            Succeeded = true,
+            Message = $"Статус заявки №{application.Id} успешно изменён!"
+        };
+
+        return Ok(resultApplication);
+    }
+
+    /// <summary>
+    /// Изменить статус просмотра заявки
+    /// </summary>
+    /// <param name="id">Идентификатор</param>
+    /// <param name="applicationIsCheckDto">Модель изменения состояния</param>
+    /// <returns></returns>
+    [HttpPost("GetApplications/{id:guid}/check")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ApplicationIsCheck([FromRoute] Guid id, [FromBody] ApplicationIsCheckDto applicationIsCheckDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(applicationIsCheckDto);
+
+        var application = await _context.Applications
+            .FirstOrDefaultAsync(item => item.Id == id);
+        if (application is null)
+            return NotFound();
+
+        application.IsCheck = applicationIsCheckDto.IsCheck;
 
         _context.Applications.Update(application);
         await _context.SaveChangesAsync();

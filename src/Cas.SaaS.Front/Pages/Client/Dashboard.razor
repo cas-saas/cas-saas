@@ -1,7 +1,9 @@
 ﻿@page "/dashboard"
 @using Microsoft.AspNetCore.Authorization;
-@using Cas.SaaS.Contracts
-@*todo*@
+@using Cas.SaaS.Contracts.Employee
+@using Cas.SaaS.Contracts.Brigade
+@using Cas.SaaS.Contracts.Client;
+@inject Helpers.HttpClientHelper Http
 @attribute [Authorize(Roles = "Client")]
 
 <PageTitle>Dashboard</PageTitle>
@@ -9,3 +11,41 @@
 <h1>Dashboard</h1>
 
 <p>Welcome to the dashboard!</p>
+
+<div class ="container">
+    <div class="row">
+		<div class="card">
+			<div class="top-container">
+				<div class="ml-3">
+					<h5 class="name">@client.Name @client.Patronymic</h5>
+					<p class="mail">@client.Email</p>
+					<p class="role">@client.Role</p>
+				</div>
+			</div>
+		</div>
+    </div>
+    <div class="row">
+        <div class="col">
+            Активные наряды
+        </div>
+        <div class="col">
+            Сотрудники
+            <div>
+                Активные / Все
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private EmployeeDto[]? employees;
+    private BrigadeDto[]? brigades;
+    private ClientDto client = new ClientDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        employees = await Http.GetEmployeesAsync();
+        brigades = await Http.GetBrigadesAsync();
+        client = await Http.GetClientInfo();
+    }
+}

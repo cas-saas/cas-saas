@@ -1,0 +1,84 @@
+﻿@page "/admin/applications"
+@using Cas.SaaS.Contracts.Application;
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpAdminHelper Http
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Заявки</PageTitle>
+
+<h1>Список заявок</h1>
+
+@if (applications is null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+    @foreach (var application in applications)
+    {
+            <div class="col-sm-6">
+                <div class="position-relative m-3">
+                    <div class="card" style="width: 36rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">Название организации: @application.Title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">Идентификатор: @application.Id</h6>
+                            <p class="card-text">
+                                <div class="p-3 bg-info bg-opacity-10 border border-info border-start-0 rounded-end">
+                                    @application.Description
+                                </div>
+                            </p>
+                            <a href="/admin/application/@application.Id" class="btn btn-primary">Посмотреть заявку</a>
+                        </div>
+                    </div>
+                    @if (!application.IsCheck)
+                    {
+                        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                            <span class="visually-hidden">Новые уведомления</span>
+                        </span>
+                    }
+            </div>
+        </div>
+    }
+    </div>
+}
+
+@code {
+    private ApplicationDto[]? applications;
+
+    protected override async Task OnInitializedAsync()
+    {
+        applications = await Http.GetApplicationsAsync();
+    }
+}
+
+@*@switch (application.Status)
+{
+    case Models.ApplicationStates.New:
+        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-primary border border-light rounded-circle">
+            <span class="visually-hidden">Новая</span>
+        </span>
+        break;
+
+    case Models.ApplicationStates.InProgress:
+        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-warning border border-light rounded-circle">
+            <span class="visually-hidden">Рассматривается</span>
+        </span>
+        break;
+
+    case Models.ApplicationStates.Rejected:
+        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+            <span class="visually-hidden">Отклонена</span>
+        </span>
+        break;
+
+    case Models.ApplicationStates.Approved:
+        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle">
+            <span class="visually-hidden">Одобрена</span>
+        </span>
+        break;
+}*@

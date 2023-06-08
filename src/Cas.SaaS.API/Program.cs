@@ -1,6 +1,7 @@
 using Cas.SaaS.API;
 using Cas.SaaS.API.Helpers;
 using Cas.SaaS.API.Options;
+using Cas.SaaS.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -18,6 +19,8 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
+
+ConfigureEmailSender(builder);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>
@@ -106,3 +109,19 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+void ConfigureEmailSender(WebApplicationBuilder webApplicationBuilder)
+{
+    var smtpClientOptions = webApplicationBuilder.Configuration.GetSection(nameof(SmtpClientOptions)).Get<SmtpClientOptions>();
+    if (smtpClientOptions == null)
+    {
+        throw new Exception("SmtpClientOptions is null");
+    }
+
+    var codeTemplateOptions = webApplicationBuilder.Configuration.GetSection(nameof(CodeTemplateOptions)).Get<CodeTemplateOptions>();
+    if (codeTemplateOptions == null)
+    {
+        throw new Exception("CodeTemplateOptions is null");
+    }
+    webApplicationBuilder.Services.AddSingleton(new EmailSenderService(smtpClientOptions, codeTemplateOptions));
+}
