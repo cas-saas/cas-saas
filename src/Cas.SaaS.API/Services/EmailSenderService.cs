@@ -1,9 +1,8 @@
 ﻿using Cas.SaaS.API.Options;
 using Cas.SaaS.Models;
+using Cas.SaaS.Shared;
 using MailKit.Net.Smtp;
 using MimeKit;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
 
 namespace Cas.SaaS.API.Services;
 
@@ -90,25 +89,5 @@ public class EmailSenderService
         }
 
         return true;
-    }
-}
-
-/// <summary>
-/// Enumeration type extension methods.
-/// </summary>
-public static class EnumExtensions
-{
-    public static T? GetAttributeOfType<T>(this Enum enumValue) where T : Attribute
-    {
-        var type = enumValue.GetType();
-        var memInfo = type.GetMember(enumValue.ToString()).First();
-        var attributes = memInfo.GetCustomAttributes<T>(false);
-        return attributes.FirstOrDefault();
-    }
-
-    public static string? GetDisplayName(this Enum enumValue)
-    {
-        var attribute = enumValue.GetAttributeOfType<DisplayAttribute>();
-        return attribute == null ? enumValue.ToString() : attribute.Name;
     }
 }

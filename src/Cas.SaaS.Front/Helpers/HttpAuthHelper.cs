@@ -1,8 +1,9 @@
 ﻿using Cas.SaaS.Client.Services;
 using Cas.SaaS.Contracts.Application;
-using Cas.SaaS.Contracts.Employee;
+using Cas.SaaS.Contracts.Brigade;
+using Cas.SaaS.Contracts.Delivery;
+using Cas.SaaS.Contracts.TariffPlan;
 using Cas.SaaS.Contracts.User;
-using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -105,6 +106,45 @@ public class HttpAuthHelper
         catch
         {
             return new ApplicationDto();
+        }
+    }
+
+    /// <summary>
+    /// Получить все тарифы в системе
+    /// </summary>
+    /// <returns></returns>
+    public async Task<TariffPlanDto[]> GetTariffPlansAsync()
+    {
+        try
+        {
+            return await _http.GetFromJsonAsync<TariffPlanDto[]>($"api/Tariffs/GetTariffs");
+        }
+        catch
+        {
+            return new TariffPlanDto[0];
+        }
+    }
+
+    /// <summary>
+    /// Получить все заказы в системе
+    /// </summary>
+    /// <returns></returns>
+    public async Task<DeliveryDto[]> GetDeliveriesAsync()
+    {
+        try
+        {
+            var token = await _tokenService.GetToken();
+
+            if (token != null && token.Expiration > DateTime.UtcNow)
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
+            }
+
+            return await _http.GetFromJsonAsync<DeliveryDto[]>($"api/Users/GetDeliveries");
+        }
+        catch
+        {
+            return new DeliveryDto[0];
         }
     }
 }

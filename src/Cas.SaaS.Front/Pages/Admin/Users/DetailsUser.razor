@@ -1,0 +1,177 @@
+﻿@page "/admin/user/{userId:guid}/details"
+@using Cas.SaaS.Contracts.User;
+@using Cas.SaaS.Shared;
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpAdminHelper Http
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Детали пользователя</PageTitle>
+
+@if (userDetail is null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else if (userDetail.Id == Guid.Empty)
+{
+    <div class="text-center">
+        <p>Данного пользователя нет в системе!</p>
+    </div>
+}
+else
+{
+    <div>
+        <h4>Данные о клиенте</h4>
+        <div class="form-group">
+            <a class="btn btn-success" href="/admin/user/@userDetail.Id/tariff">Добавить заказ</a>
+        </div>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-2">
+                ФИО
+            </dt>
+            <dd class="col-sm-10">
+                @userDetail.Name @userDetail.Surname @userDetail.Patronymic
+            </dd>
+            <dt class="col-sm-2">
+                Логин
+            </dt>
+            <dd class="col-sm-10">
+                @userDetail.Login
+            </dd>
+            <dt class="col-sm-2">
+                Номер телефона
+            </dt>
+            <dd class="col-sm-10">
+                @userDetail.Phone
+            </dd>
+            <dt class="col-sm-2">
+                Почтовый адрес
+            </dt>
+            <dd class="col-sm-10">
+                @userDetail.Email
+            </dd>
+            <dt class="col-sm-2">
+                Статус
+            </dt>
+            <dd class="col-sm-10">
+                @userDetail.Status.GetDisplayName()
+            </dd>
+        </dl>
+        @if (userDetail.Role == Models.UserRoles.Client)
+        {
+            <hr />
+            <div class="row">
+                <div class="col">
+                    <h4>Сотрудники</h4>
+                    @if (userDetail.Employees.Count <= 0)
+                    {
+                        <div class="text-center">
+                            <p>Список сотрудников пуст!</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        ФИО
+                                    </th>
+                                    <th>
+                                        Логин
+                                    </th>
+                                    <th>
+                                        Номер телефона
+                                    </th>
+                                    <th>
+                                        Активен ли
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var employee in userDetail.Employees)
+                                {
+                                    <tr>
+                                        <td>
+                                            @employee.Name @employee.Surname @employee.Patronymic
+                                        </td>
+                                        <td>
+                                            @employee.Login
+                                        </td>
+                                        <td>
+                                            @employee.Phone
+                                        </td>
+                                        <td>
+                                            @(employee.IsActive ? "Да" : "Нет")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    }
+                </div>
+                <div class="col">
+                    <h4>Заказы</h4>
+                    @if (userDetail.Deliveries.Count <= 0)
+                    {
+                        <div class="text-center">
+                            <p>Список заказов пуст!</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Дата оформления услуги
+                                    </th>
+                                    <th>
+                                        Дата окончания услуги
+                                    </th>
+                                    <th>
+                                        Идентификатор тариф
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var delivery in userDetail.Deliveries)
+                                {
+                                    <tr>
+                                        <td>
+                                            @delivery.CreatedDate
+                                        </td>
+                                        <td>
+                                            @delivery.EndDate
+                                        </td>
+                                        <td>
+                                            @delivery.TariffPlanId
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+            <hr />
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid userId { get; set; }
+
+    private UserDetailDto? userDetail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userDetail = await Http.GetClientByIdAsync(userId);
+    }
+}

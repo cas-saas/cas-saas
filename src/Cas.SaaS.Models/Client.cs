@@ -8,7 +8,7 @@ public class Client : User
     /// <summary>
     /// Статус клиента
     /// </summary>
-    public ClientStatus Status { get; set; }
+    public ClientStatus Status { get; set; } = ClientStatus.None;
     /// <summary>
     /// Список сотрудников клиента
     /// </summary>

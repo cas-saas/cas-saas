@@ -1,6 +1,7 @@
 ﻿using Cas.SaaS.Client.Services;
 using Cas.SaaS.Contracts.Application;
 using Cas.SaaS.Contracts.Client;
+using Cas.SaaS.Contracts.Delivery;
 using Cas.SaaS.Contracts.Employee;
 using Cas.SaaS.Contracts.User;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -44,6 +45,29 @@ public class HttpAdminHelper
         catch
         {
             return new UserDto[0];
+        }
+    }
+
+    /// <summary>
+    /// Получить список пользователей
+    /// </summary>
+    /// <returns></returns>
+    public async Task<Guid> DeleteUserById(Guid id)
+    {
+        try
+        {
+            var token = await _tokenService.GetToken();
+
+            if (token != null && token.Expiration > DateTime.UtcNow)
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
+            }
+
+            return await _http.GetFromJsonAsync<Guid>($"api/Users/RemoveUser/{id}");
+        }
+        catch
+        {
+            return id;
         }
     }
 
@@ -139,6 +163,29 @@ public class HttpAdminHelper
     }
 
     /// <summary>
+    /// Добавить заказ клиента
+    /// </summary>
+    /// <returns></returns>
+    public async Task<HttpResponseMessage> AddDeliveryClientAsync(DeliveryTariffAddDto deliveryTariffAddDto)
+    {
+        try
+        {
+            var token = await _tokenService.GetToken();
+
+            if (token != null && token.Expiration > DateTime.UtcNow)
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
+            }
+
+            return await _http.PostAsJsonAsync("api/Users/AddDelivery", deliveryTariffAddDto);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Детали заявки по идентификатору
     /// </summary>
     /// <returns></returns>
@@ -192,6 +239,29 @@ public class HttpAdminHelper
                 Succeeded = false,
                 Message = "Sorry, we were unable to log you in at this time. Please try again shortly."
             };
+        }
+    }
+
+    /// <summary>
+    /// Детали клиента по идентификатору
+    /// </summary>
+    /// <returns></returns>
+    public async Task<UserDetailDto> GetClientByIdAsync(Guid id)
+    {
+        try
+        {
+            var token = await _tokenService.GetToken();
+
+            if (token != null && token.Expiration > DateTime.UtcNow)
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
+            }
+
+            return await _http.GetFromJsonAsync<UserDetailDto>($"api/Users/GetUserById/{id}");
+        }
+        catch
+        {
+            return new UserDetailDto();
         }
     }
 

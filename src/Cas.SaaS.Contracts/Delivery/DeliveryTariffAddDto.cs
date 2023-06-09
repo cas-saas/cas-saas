@@ -5,10 +5,10 @@ public class DeliveryTariffAddDto
     /// <summary>
     /// Идентификатор клиента
     /// </summary>
-    public Guid ClientId { get; set; }
+    public string ClientId { get; set; } = string.Empty;
 
     /// <summary>
     /// Идентификатор тариф
     /// </summary>
-    public Guid TariffPlanId { get; set; }
+    public string TariffPlanId { get; set; } = string.Empty;
 }

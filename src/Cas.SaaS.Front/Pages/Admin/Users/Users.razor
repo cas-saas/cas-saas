@@ -20,6 +20,12 @@
         </div>
     </div>
 }
+else if (users.Count() <= 0)
+{
+    <div class="text-center">
+        <p>Список пользователей пуст!</p>
+    </div>
+}
 else
 {
     <table class="table">
@@ -44,7 +50,13 @@ else
                     <td>@user.Phone</td>
                     <td>@user.Email</td>
                     <td>@user.Role</td>
-                    <th>Действия</th>
+                    <th>
+                        <div class="row">
+                            <a href="/admin/user/@user.Id/update" class="btn btn-primary col m-1">Обновить</a>
+                            <a href="/admin/user/@user.Id/details" class="btn btn-info col text-white m-1">Детали</a>
+                            <button @onclick="() => UserDeleteAsync(user.Id)" class="btn btn-danger col m-1">Удалить</button>
+                        </div>
+                    </th>
                 </tr>
             }
         </tbody>
@@ -53,9 +65,16 @@ else
 
 @code {
     private UserDto[]? users;
+    private Guid? idDeleted;
 
     protected override async Task OnInitializedAsync()
     {
         users = await Http.GetUsersAsync();
+    }
+
+    public async Task UserDeleteAsync(Guid id)
+    {
+        idDeleted = await Http.DeleteUserById(id);
+        await OnInitializedAsync();
     }
 }

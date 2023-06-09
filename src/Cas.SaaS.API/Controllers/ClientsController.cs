@@ -84,6 +84,13 @@ public class ClientsController : Controller
         if (delivery is null)
             return Conflict("Ошибка! Заказ на использование небыл оформлен!");
 
+        var client = await _context.Clients.FindAsync(clientInfo.GuidId);
+        if (client is null)
+            return BadRequest();
+
+        if (client.Status == ClientStatus.NotPaid)
+            return Conflict("Ошибка! Аккаунт не был оплачен!");
+
         var currentPlan = await _context.TariffPlans.FirstOrDefaultAsync(item => item.Id == delivery.TariffPlanId);
         if (currentPlan is null) 
             return NoContent();
@@ -106,10 +113,6 @@ public class ClientsController : Controller
             await _context.SaveChangesAsync();
             return Ok();
         }
-
-        var client = await _context.Clients.FindAsync(clientInfo.GuidId);
-        if (client is null)
-            return BadRequest();
 
         var item = new Employee
         {
@@ -188,7 +191,7 @@ public class ClientsController : Controller
         return Ok();
     }
 
-    [Route("GetClient"), HttpGet]
+/*    [Route("GetClient"), HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClientDto))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -217,7 +220,7 @@ public class ClientsController : Controller
         };
 
         return Ok(clientDto);
-    }
+    }*/
 
     #region Claims
 

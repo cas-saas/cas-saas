@@ -85,6 +85,7 @@
     <ProjectReference Include="..\Cas.SaaS.Contracts\Cas.SaaS.Contracts.csproj" />
     <ProjectReference Include="..\Cas.SaaS.Front\Cas.SaaS.Client.csproj" />
     <ProjectReference Include="..\Cas.SaaS.Models\Cas.SaaS.Models.csproj" />
+    <ProjectReference Include="..\Cas.SaaS.Shared\Cas.SaaS.Shared.csproj" />
   </ItemGroup>
 
 </Project>

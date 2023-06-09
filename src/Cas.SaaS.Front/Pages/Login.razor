@@ -6,8 +6,6 @@
 <PageTitle>Вход в систему</PageTitle>
 
 <EditForm Model="@userLoginDTO" OnValidSubmit="@HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
@@ -23,7 +21,7 @@
                     <div class="form-group row p-2">
                         <label class="col-md-4 col-form-label text-md-right">Пароль</label>
                         <div class="col-md-6">
-                            <InputText class="form-control" id="Password" @bind-Value="userLoginDTO.Password" placeholder="Пароль" />
+                            <InputText type="password" class="form-control" id="Password" @bind-Value="userLoginDTO.Password" placeholder="Пароль" />
                         </div>
                     </div>
                     @if (!loggingIn)

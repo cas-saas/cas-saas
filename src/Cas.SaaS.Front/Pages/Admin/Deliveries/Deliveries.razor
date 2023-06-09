@@ -1,0 +1,62 @@
+﻿@page "/admin/deliveries"
+@using Cas.SaaS.Contracts.Delivery;
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpAuthHelper Http
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Заказы</PageTitle>
+
+@if (deliveries is null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else if (deliveries.Count() <= 0)
+{
+    <div class="text-center">
+        <p>Список заказов пуст!</p>
+    </div>
+}
+else
+{
+    @foreach (var item in deliveries)
+    {
+        <div class="card border-dark mb-3">
+            <div class="card-header">Данные заказа №<strong>@item.Id</strong></div>
+            <div class="card-body text-dark">
+                <p class="card-text">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Дата заказа</th>
+                                <th>Дата окончания</th>
+                                <th>Клиент</th>
+                                <th>Тариф</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>@item.CreatedDate</td>
+                                <td>@item.EndDate</td>
+                                <td>@item.ClientId</td>
+                                <td>@item.TariffPlanId</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </p>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private DeliveryDto[]? deliveries;
+
+    protected override async Task OnInitializedAsync()
+    {
+        deliveries = await Http.GetDeliveriesAsync();
+    }
+}

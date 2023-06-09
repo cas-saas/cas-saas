@@ -1,5 +1,6 @@
 ﻿@page "/dashboard"
 @using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization
 @using Cas.SaaS.Contracts.Employee
 @using Cas.SaaS.Contracts.Brigade
 @using Cas.SaaS.Contracts.Client;
@@ -8,7 +9,7 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<h1>Dashboard</h1>
+<h3>Dashboard</h3>
 
 <p>Welcome to the dashboard!</p>
 
@@ -17,9 +18,12 @@
 		<div class="card">
 			<div class="top-container">
 				<div class="ml-3">
-					<h5 class="name">@client.Name @client.Patronymic</h5>
+                    <AuthorizeView>
+                        <h3>@context.User.Identity.Name</h3>
+                    </AuthorizeView>
+					@*<h5 class="name">@context.Name @client.Patronymic</h5>
 					<p class="mail">@client.Email</p>
-					<p class="role">@client.Role</p>
+					<p class="role">@client.Role</p>*@
 				</div>
 			</div>
 		</div>
@@ -40,12 +44,10 @@
 @code {
     private EmployeeDto[]? employees;
     private BrigadeDto[]? brigades;
-    private ClientDto client = new ClientDto();
 
     protected override async Task OnInitializedAsync()
     {
         employees = await Http.GetEmployeesAsync();
         brigades = await Http.GetBrigadesAsync();
-        client = await Http.GetClientInfo();
     }
 }

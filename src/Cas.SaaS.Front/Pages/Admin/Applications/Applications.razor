@@ -19,7 +19,7 @@
 else
 {
     <div class="row">
-    @foreach (var application in applications)
+    @foreach (var application in applicationsView)
     {
             <div class="col-sm-6">
                 <div class="position-relative m-3">
@@ -49,10 +49,13 @@ else
 
 @code {
     private ApplicationDto[]? applications;
+    private List<ApplicationDto> applicationsView = null!;
 
     protected override async Task OnInitializedAsync()
     {
         applications = await Http.GetApplicationsAsync();
+
+        applicationsView = applications.Where(x => x.Status != Models.ApplicationStates.Rejected).ToList();
     }
 }
 

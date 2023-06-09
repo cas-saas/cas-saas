@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.15" />
@@ -21,6 +23,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cas.SaaS.Contracts\Cas.SaaS.Contracts.csproj" />
+    <ProjectReference Include="..\Cas.SaaS.Shared\Cas.SaaS.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Pages\Client\Brigades\" />
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,6 @@ using Cas.SaaS.Contracts.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Cas.SaaS.API.Controllers;
 
@@ -47,6 +46,13 @@ public class AuthController : ControllerBase
     {
         var user = await _context.Users.FirstOrDefaultAsync(item => item.Login == authDto.Login);
         if (user is null) return NotFound("Пользователь не найден!");
+
+        var client = await _context.Clients.FirstOrDefaultAsync(item => item.Id == user.Id);
+        if (client is not null)
+        {
+            if (client.Status == Models.ClientStatus.Blocked) 
+                return Conflict("Ошибка! Пользователь заблокирован!");
+        }
 
         // if (user.Blocked) return Conflict("Ошибка! Попытка авторизоваться заблокированному пользователю.");
         if (user.Password != authDto.Password) return Conflict("Ошибка! Неверный пароль!");

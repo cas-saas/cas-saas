@@ -4,16 +4,11 @@
 
 <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
     <div class="container">
-        <a class="navbar-brand" href="">CaSaaS</a>
+        <a class="navbar-brand">CaSaaS</a>
         <div class="d-sm-inline-flex flex-sm-row-reverse">
             <AuthorizeView>
                 <Authorized>
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <NavLink class="nav-link text-dark" href="" Match="NavLinkMatch.All">
-                                <span class="oi oi-home" aria-hidden="true"></span> Главная
-                            </NavLink>
-                        </li>
                         <li class="nav-item">
                             <NavLink class="nav-link text-dark" href="logout">
                                 <span class="oi oi-account-logout" aria-hidden="true"></span> Выйти из системы
@@ -26,6 +21,11 @@
                         <li class="nav-item">
                             <NavLink class="nav-link text-dark" href="" Match="NavLinkMatch.All">
                                 <span class="oi oi-home" aria-hidden="true"></span> Главная
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link text-dark" href="tariffs">
+                                <span class="oi oi-project" aria-hidden="true"></span> Тарифные планы
                             </NavLink>
                         </li>
                         <li class="nav-item">
@@ -52,13 +52,48 @@
                             }
                         </NavLink>
                     </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="admin/deliveries">
+                            <span class="oi oi-file" aria-hidden="true"></span> Список заказов
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="admin/tariffs">
+                            <span class="oi oi-project" aria-hidden="true"></span> Тарифы
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="" Match="NavLinkMatch.All">
+                            <span class="oi oi-home" aria-hidden="true"></span> Главная
+                        </NavLink>
+                    </li>
                 </ul>
             </AuthorizeView>
             <AuthorizeView Roles="Client">
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
                         <NavLink class="nav-link text-dark" href="/employees">
-                            <span class="oi oi-people" aria-hidden="true"></span> Список сотрудников
+                            <span class="oi oi-people" aria-hidden="true"></span> Сотрудники
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="/brigades">
+                            <span class="oi oi-wrench" aria-hidden="true"></span> Наряды
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="/services">
+                            <span class="oi oi-basket" aria-hidden="true"></span> Услуги
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="/client/settings">
+                            <span class="oi oi-cog" aria-hidden="true"></span> Настройки профиля
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link text-dark" href="" Match="NavLinkMatch.All">
+                            <span class="oi oi-home" aria-hidden="true"></span> Главная
                         </NavLink>
                     </li>
                 </ul>

@@ -67,7 +67,7 @@ public class HttpClientHelper
         }
     }
 
-    public async Task<ClientDto> GetClientInfo()
+/*    public async Task<ClientDto> GetClientInfo()
     {
         try
         {
@@ -84,7 +84,7 @@ public class HttpClientHelper
         {
             return new ClientDto();
         }
-    }
+    }*/
 
     /// <summary>
     /// Добавить сотрудника

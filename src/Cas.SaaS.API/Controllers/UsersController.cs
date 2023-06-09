@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Cas.SaaS.Contracts.Client;
 using Cas.SaaS.Contracts.Employee;
-using Cas.SaaS.Contracts.TariffPlan;
 using Cas.SaaS.Contracts.Delivery;
 
 namespace Cas.SaaS.API.Controllers;
@@ -38,7 +37,7 @@ public class UsersController : Controller
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _context.Users
+        return Ok(await _context.Users.Where(item => item.Role != UserRoles.Admin)
             .Select(item => new UserDto
             {
                 Id = item.Id,
@@ -99,6 +98,70 @@ public class UsersController : Controller
     }
 
     /// <summary>
+    /// Получить клиента по его ид
+    /// </summary>
+    [Route("GetUserById/{id:guid}"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDetailDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetUserById(Guid id)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+        if (user is null)
+            return NotFound();
+
+        var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == user.Id);
+        if (client is null)
+            client = new Models.Client();
+
+        var employee = await _context.Employees.Where(x => x.ClientId == user.Id).
+            Select(item => new EmployeeDto
+            {
+                Id = item.Id,
+                Login = item.Login,
+                Phone = item.Phone,
+                Email = item.Email,
+                Name = item.Name,
+                Surname = item.Surname,
+                Patronymic = item.Patronymic,
+                Role = item.Role,
+                IsActive = item.IsActive
+            }).ToListAsync();
+        if (employee.Count == 0)
+            employee = new List<EmployeeDto>();
+
+        var deliveries = await _context.Deliveries.Where(x => x.ClientId == user.Id).
+            Select(item => new DeliveryDto
+            {
+                Id = item.Id,
+                CreatedDate = item.CreatedDate,
+                EndDate = item.EndDate,
+                ClientId = item.ClientId,
+                TariffPlanId = item.TariffPlanId
+            }).ToListAsync();
+        if (deliveries.Count == 0)
+            deliveries = new List<DeliveryDto>();
+
+        var clientDetailDto = new UserDetailDto
+        {
+            Id = user.Id,
+            Login = user.Login,
+            Phone = user.Phone,
+            Email = user.Email,
+            Name = user.Name,
+            Surname = user.Surname,
+            Patronymic = user.Patronymic,
+            Role = user.Role,
+            Status = client.Status,
+            Employees = employee,
+            Deliveries = deliveries
+        };
+
+        return Ok(clientDetailDto);
+    }
+
+    /// <summary>
     /// Добавить клиента в систему
     /// </summary>
     /// <param name="clientAddDto">Данные по клиенту</param>
@@ -131,6 +194,7 @@ public class UsersController : Controller
             Name = clientAddDto.Name,
             Surname = clientAddDto.Surname,
             Patronymic = clientAddDto.Patronymic != null ? clientAddDto.Patronymic : null,
+            Status = ClientStatus.NotPaid,
             Role = UserRoles.Client,
         };
 
@@ -140,48 +204,22 @@ public class UsersController : Controller
     }
 
     /// <summary>
-    /// Получить все тарифы
+    /// Удалить пользователя
     /// </summary>
-    [Route("GetTariffs"), HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TariffPlanDto>))]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetTariffs()
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [Route("RemoveUser/{id:guid}"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RemoveUser(Guid id)
     {
-        return Ok(await _context.TariffPlans
-            .Select(item => new TariffPlanDto
-            {
-                Id = item.Id,
-                Title = item.Title,
-                Payment = item.Payment,
-                Price = item.Price,
-                Description = item.Description != null ? item.Description : null,
-                CountEmployees = item.CountEmployees,
-            }).ToListAsync());
-    }
+        var user = await _context.Users.FirstOrDefaultAsync(item => item.Id == id);
+        if (user is null)
+            return BadRequest();
 
-    /// <summary>
-    /// Добавить тариф в систему
-    /// </summary>
-    /// <param name="tariffAddDto">Данные по тарифу</param>
-    [Route("AddTariff"), HttpPost]
-    public async Task<IActionResult> AddTariff([FromBody] TariffPlanAddDto tariffAddDto)
-    {
-        if (!ModelState.IsValid) return BadRequest();
-
-        var item = new TariffPlan
-        {
-            Id = Guid.NewGuid(),
-            Title = tariffAddDto.Title,
-            Payment = tariffAddDto.Payment,
-            Price = tariffAddDto.Price,
-            Description = tariffAddDto.Description != null ? tariffAddDto.Description : null,
-            CountEmployees = tariffAddDto.CountEmployees
-        };
-
-        await _context.TariffPlans.AddAsync(item);
+        _context.Users.Remove(user);
         await _context.SaveChangesAsync();
-        return Ok(item.Id);
+        return RedirectToAction("Index");
     }
 
     /// <summary>
@@ -217,22 +255,26 @@ public class UsersController : Controller
     {
         if (!ModelState.IsValid) return BadRequest();
 
-        var tariff = await _context.TariffPlans.FindAsync(deliveryTariffAddDto.TariffPlanId);
+        var tariff = await _context.TariffPlans.FindAsync(Guid.Parse(deliveryTariffAddDto.TariffPlanId));
         if (tariff is null)
             return BadRequest();
 
-        var client = await _context.Clients.FindAsync(deliveryTariffAddDto.ClientId);
+        var client = await _context.Clients.FindAsync(Guid.Parse(deliveryTariffAddDto.ClientId));
         if (client is null)
             return BadRequest();
+
+        client.Status = ClientStatus.Paid;
+        await _context.Clients.AddAsync(client);
+        await _context.SaveChangesAsync();
 
         var item = new Delivery
         {
             Id = Guid.NewGuid(),
             CreatedDate = DateTime.UtcNow,
             EndDate = DateTime.UtcNow.AddDays(tariff.Payment),
-            ClientId = deliveryTariffAddDto.ClientId,
+            ClientId = Guid.Parse(deliveryTariffAddDto.ClientId),
             Client = client,
-            TariffPlanId = deliveryTariffAddDto.TariffPlanId,
+            TariffPlanId = Guid.Parse(deliveryTariffAddDto.TariffPlanId),
             TariffPlan = tariff
         };
 

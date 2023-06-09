@@ -6,9 +6,7 @@
 <CascadingAuthenticationState>
     <AuthorizeView>
         <Authorized>
-            <div class="form-group">
-                <a>@context.User.Identity.Name</a>
-            </div>
+            <h1 class="m-3">Привет, мир!</h1>
         </Authorized>
         <NotAuthorized>
             <div class="form-group">
@@ -26,6 +24,12 @@
                 <a class="btn btn-info" href="application/@applicationId">Посмотреть статус заявки</a>
             </div>
         </NotAuthorized>
+    </AuthorizeView>
+    <AuthorizeView Roles="Client">
+        <Cas.SaaS.Client.Pages.Client.Dashboard></Cas.SaaS.Client.Pages.Client.Dashboard>
+    </AuthorizeView>
+    <AuthorizeView Roles="Admin">
+        <Cas.SaaS.Client.Pages.Admin.DashboardAdmin></Cas.SaaS.Client.Pages.Admin.DashboardAdmin>
     </AuthorizeView>
 </CascadingAuthenticationState>
 

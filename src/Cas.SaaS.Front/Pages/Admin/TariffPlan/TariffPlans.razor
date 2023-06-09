@@ -1,0 +1,49 @@
+﻿@page "/admin/tariffs"
+@using Cas.SaaS.Contracts.TariffPlan;
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpAuthHelper Http
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Тарифные планы</PageTitle>
+
+@if (tariffs is null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var item in tariffs)
+    {
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row g-0">
+                <div class="col-md-1 bg-primary">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <p class="card-text"><small class="text-muted">Идентификатор тарифа: @item.Id</small></p>
+                        <hr>
+                        <h4 class="card-title">Название: @item.Title</h4>
+                        <p class="card-text">Описание: @item.Description</p>
+                        <p class="card-text">Цена: @item.Price рублей</p>
+                        <p class="card-text"><small class="text-muted">Период оплаты каждые @item.Payment дней</small></p>
+                        <p class="card-text"><small class="text-muted">Количество сотрудников для добавления: @item.CountEmployees</small></p>
+                    </div>
+                    <a class="btn btn-primary m-2" href="admin/tariffs/@item.Id/update">Изменить</a>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private TariffPlanDto[]? tariffs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tariffs = await Http.GetTariffPlansAsync();
+    }
+}
