@@ -29,6 +29,8 @@ public class DatabaseContext : DbContext
     /// <param name="options"></param>
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
         if (Database.GetPendingMigrations().Any())
             Database.Migrate();
     }
@@ -69,6 +71,7 @@ public class DatabaseContext : DbContext
         modelBuilder.Entity<Application>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.NumberApplication).IsRequired();
             entity.Property(e => e.Title).IsRequired();
             entity.Property(e => e.Name).IsRequired();
             entity.Property(e => e.Description);
@@ -82,11 +85,16 @@ public class DatabaseContext : DbContext
         modelBuilder.Entity<Brigade>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.NumberBrigade).IsRequired();
             entity.Property(e => e.Status).IsRequired();
             entity.Property(e => e.Customer).IsRequired();
             entity.Property(e => e.Phone).IsRequired();
             entity.Property(e => e.Address).IsRequired();
             entity.Property(e => e.Description).IsRequired();
+
+            entity.Property(e => e.StartDate).IsRequired();
+            entity.Property(e => e.EndDate).IsRequired();
+            entity.Property(e => e.CreatedDate).IsRequired();
 
             entity.HasOne(b => b.Service).WithMany(s => s.Brigades).HasForeignKey(b => b.ServiceId);
             entity.HasMany(b => b.Employees).WithMany(e => e.Brigades);
@@ -104,6 +112,7 @@ public class DatabaseContext : DbContext
         modelBuilder.Entity<Delivery>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.NumberDelivery).IsRequired();
             entity.Property(e => e.CreatedDate).IsRequired();
             entity.Property(e => e.EndDate).IsRequired();
 

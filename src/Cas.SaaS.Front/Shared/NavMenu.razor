@@ -122,6 +122,7 @@
             if (applicationResultDTO.Succeeded)
             {
                 if (Convert.ToInt32(applicationResultDTO.Message) > 99) viewCount = "99+";
+                else if (applicationResultDTO.Message == "0") viewCount = string.Empty;
                 else viewCount = applicationResultDTO.Message;
                 isAdmin = true;
             }

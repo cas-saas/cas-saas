@@ -13,32 +13,27 @@ public class BrigadeDto
     public Guid Id { get; set; }
 
     /// <summary>
+    /// Номер наряда
+    /// </summary>
+    public string NumberBrigade { get; set; } = string.Empty;
+
+    /// <summary>
     /// Статус наряда
     /// </summary>
     public BrigadeStates Status { get; set; }
 
     /// <summary>
-    /// Идентификатор услуги
+    /// Дата начала работы
     /// </summary>
-    public Guid ServiceId { get; set; }
+    public DateTime StartDate { get; set; }
 
     /// <summary>
-    /// Заказчик ФИО
+    /// Дата окончания работы
     /// </summary>
-    public string Customer { get; set; } = string.Empty;
+    public DateTime EndDate { get; set; }
 
     /// <summary>
-    /// Номер заказчика
+    /// Дата создания
     /// </summary>
-    public string Phone { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Адрес заказа
-    /// </summary>
-    public string Address { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Комментраии к наряду
-    /// </summary>
-    public string Description { get; set; } = string.Empty;
+    public DateTime CreatedDate { get; set; }
 }

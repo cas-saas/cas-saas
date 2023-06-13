@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cas.SaaS.API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Cas.SaaS.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230612190616_editContextModels")]
+    partial class editContextModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,9 +94,6 @@ namespace Cas.SaaS.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Customer")
                         .IsRequired()
                         .HasColumnType("text");
@@ -101,9 +101,6 @@ namespace Cas.SaaS.API.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NumberBrigade")
                         .IsRequired()
@@ -115,9 +112,6 @@ namespace Cas.SaaS.API.Migrations
 
                     b.Property<Guid>("ServiceId")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -272,7 +266,7 @@ namespace Cas.SaaS.API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("8b90832d-01a1-4e36-a68f-21b6b05610a9"),
+                            Id = new Guid("e450ce4e-d686-4cdf-9d35-89c09e767781"),
                             Email = "pmarkelo77@gmail.com",
                             Login = "pmarkelo77",
                             Name = "Павел",

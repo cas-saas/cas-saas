@@ -12,14 +12,14 @@
 ﻿<EditForm Model="employeeAddDto" OnValidSubmit="OnValidSubmit">
 
     <div class="form-group p-2">
-        <label for="name">Имя</label>
-        <div>
-            <InputText class="form-control" id="name" @bind-Value="@employeeAddDto.Name" />
-        </div>
-
         <label for="surname">Фамилия</label>
         <div>
             <InputText class="form-control" id="surname" @bind-Value="@employeeAddDto.Surname" />
+        </div>
+
+        <label for="name">Имя</label>
+        <div>
+            <InputText class="form-control" id="name" @bind-Value="@employeeAddDto.Name" />
         </div>
 
         <label for="patronymic">Отчество</label>

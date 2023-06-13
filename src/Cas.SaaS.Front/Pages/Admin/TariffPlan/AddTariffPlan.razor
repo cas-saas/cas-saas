@@ -1,0 +1,89 @@
+﻿@page "/admin/tariff/create"
+@using Cas.SaaS.Contracts.TariffPlan;
+@inject NavigationManager navigationManager
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpAdminHelper Http
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Добавление тарифного плана</PageTitle>
+
+<h2>Добавление тарифного плана</h2>
+
+@if (statusAddTariff)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else
+{
+    <EditForm Model="tariffPlanAddDto" OnValidSubmit="OnValidSubmit">
+
+        <div class="form-group p-2">
+            <label for="title">Заголовок</label>
+            <div>
+                <InputText class="form-control" id="title" @bind-Value="@tariffPlanAddDto.Title" />
+            </div>
+
+            <label for="payment">Период оплаты</label>
+            <div>
+                <InputNumber class="form-control" id="payment" @bind-Value="@tariffPlanAddDto.Payment" />
+            </div>
+
+            <label for="price">Цена</label>
+            <div>
+                <InputNumber class="form-control" id="price" @bind-Value="@tariffPlanAddDto.Price" />
+            </div>
+
+            <label for="countEmployees">Количество доступных сотрудников</label>
+            <div>
+                <InputNumber class="form-control" id="phone" @bind-Value="@tariffPlanAddDto.CountEmployees" />
+            </div>
+
+            <label for="description">Описание</label>
+            <div>
+                <InputTextArea class="form-control" id="description" @bind-Value="@tariffPlanAddDto.Description" />
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Добавить</button>
+        <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+
+    </EditForm>
+}
+
+@code {
+    private bool statusAddTariff = false;
+
+    TariffPlanAddDto tariffPlanAddDto = new TariffPlanAddDto();
+
+    protected async Task OnValidSubmit()
+    {
+        statusAddTariff = false;
+
+        var response = await Http.AddTariffPlanAsync(tariffPlanAddDto);
+
+        var body = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
+        {
+            // success
+            Console.WriteLine($"the id of the tariff is: {body}");
+            navigationManager.NavigateTo("/admin/tariffs");
+        }
+        else
+        {
+            // not success
+            Console.WriteLine(body);
+        }
+
+        statusAddTariff = true;
+    }
+
+    private void Clear()
+    {
+        tariffPlanAddDto = new TariffPlanAddDto();
+    }
+}

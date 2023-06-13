@@ -1,0 +1,116 @@
+﻿@page "/service/create"
+@using Cas.SaaS.Contracts.Service;
+@using Microsoft.AspNetCore.Authorization;
+@inject NavigationManager navigationManager
+@inject Helpers.HttpClientHelper Http
+@attribute [Authorize(Roles = "Client")]
+
+<PageTitle>Добавление услуги</PageTitle>
+
+<h2>Добавление услуги</h2>
+
+﻿<EditForm Model="serviceAddDto" OnValidSubmit="OnValidSubmit">
+
+    <div class="form-group p-2">
+        <label for="name">Название услуги</label>
+        <div>
+            <InputText class="form-control" id="name" @bind-Value="@serviceAddDto.Name" />
+        </div>
+
+        <label for="description">Описание услуги</label>
+        <div>
+            <InputText class="form-control" id="description" @bind-Value="@serviceAddDto.Description" />
+        </div>
+
+        <label for="tools">Инструменты</label>
+
+        @if (addedTools)
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="col-sm-4">#</th>
+                        <th class="col-sm-8">Название инструмента</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var tool in serviceAddDto.Tools)
+                    {
+                        <tr>
+                            <td>@tool.Id</td>
+                            <td>
+                                <div class="input-group">
+                                    <InputText class="form-control" id="tool" @bind-Value="@tool.Name" />
+                                    <span class="btn btn-danger" type="button" @onclick="RemoveTool">X</span>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <div>
+            <button class="btn btn-primary" type="button" @onclick="AddTool">Добавить инструмент</button>
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Добавить</button>
+    <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+
+</EditForm>
+
+@code {
+    ServiceAddDto serviceAddDto = new ServiceAddDto();
+    public int count { get; set; } = 0;
+    private bool addedTools = false;
+
+    protected async Task OnValidSubmit()
+    {
+        var response = await Http.AddServiceAsync(serviceAddDto);
+
+        var body = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
+        {
+            // success
+            Console.WriteLine($"the id of the service is: {body}");
+            navigationManager.NavigateTo("services");
+        }
+        else
+        {
+            // not success
+            Console.WriteLine(body);
+        }
+    }
+
+    private void AddTool()
+    {
+        addedTools = true;
+        count++;
+        serviceAddDto.Tools.Add(new Tool()
+            {
+                Id = count,
+                Name = string.Empty
+            });
+        OnInitializedAsync();
+    }
+
+    private void RemoveTool()
+    {
+        count--;
+        var t = serviceAddDto.Tools.Last();
+        serviceAddDto.Tools.Remove(t);
+        if (serviceAddDto.Tools.Count == 0)
+        {
+            addedTools = false;
+        }
+        OnInitializedAsync();
+    }
+
+    private void Clear()
+    {
+        count = 0;
+        serviceAddDto = new ServiceAddDto();
+    }
+}

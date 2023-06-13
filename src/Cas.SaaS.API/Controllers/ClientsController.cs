@@ -7,9 +7,7 @@ using System.Data;
 using System.Security.Claims;
 using Cas.SaaS.API.Helpers;
 using Cas.SaaS.Models;
-using Cas.SaaS.Contracts.Client;
-using System.Numerics;
-using static System.Net.Mime.MediaTypeNames;
+using Cas.SaaS.API.Services;
 
 namespace Cas.SaaS.API.Controllers;
 
@@ -19,6 +17,7 @@ namespace Cas.SaaS.API.Controllers;
 public class ClientsController : Controller
 {
     private readonly DatabaseContext _context;
+    private readonly EmailSenderService _emailSenderService;
     private readonly JwtHelper _jwtHelper;
     private readonly ILogger<UsersController> _logger;
 
@@ -27,9 +26,10 @@ public class ClientsController : Controller
     /// </summary>
     /// <param name="context">Контекст базы данных</param>
     /// <param name="logger">Логгер</param>
-    public ClientsController(DatabaseContext context, JwtHelper jwtHelper, ILogger<UsersController> logger)
+    public ClientsController(DatabaseContext context, EmailSenderService emailSenderService, JwtHelper jwtHelper, ILogger<UsersController> logger)
     {
         _context = context;
+        _emailSenderService = emailSenderService;
         _jwtHelper = jwtHelper;
         _logger = logger;
     }
@@ -66,7 +66,7 @@ public class ClientsController : Controller
     /// Добавить сотрудника в систему
     /// </summary>
     /// <param name="employeeAddDto">Данные по сотруднику</param>
-    [Route("AddEmployees"), HttpPost]
+    [Route("AddEmployee"), HttpPost]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -100,20 +100,6 @@ public class ClientsController : Controller
         if (employeeList.Count() >= currentPlan.CountEmployees)
             return Conflict("Ошибка! Первышен лимит добавления сотрудников!");
 
-        var employee = await _context.Employees.FirstOrDefaultAsync(item => item.Login == employeeAddDto.Login);
-        if (employee is not null)
-        {
-            employee.Phone = employeeAddDto.Phone;
-            employee.Email = employeeAddDto.Email;
-            employee.Name = employeeAddDto.Name;
-            employee.Surname = employeeAddDto.Surname;
-            employee.Patronymic = employeeAddDto.Patronymic != null ? employeeAddDto.Patronymic : null;
-
-            _context.Employees.Update(employee);
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-
         var item = new Employee
         {
             Id = Guid.NewGuid(),
@@ -123,16 +109,110 @@ public class ClientsController : Controller
             Password = employeeAddDto.Password,
             Name = employeeAddDto.Name,
             Surname = employeeAddDto.Surname,
-            Patronymic = employeeAddDto.Patronymic != null ? employeeAddDto.Patronymic : null,
+            Patronymic = employeeAddDto.Patronymic,
             Role = UserRoles.Employee,
             ClientId = clientInfo.GuidId,
             Client = client,
-            IsActive = false,
+            IsActive = false
         };
+
+        await _emailSenderService.SendEmployee(item);
 
         await _context.Employees.AddAsync(item);
         await _context.SaveChangesAsync();
         return Ok();
+    }
+
+    /// <summary>
+    /// Удалить пользователя
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [Route("RemoveEmployee/{id:guid}"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RemoveUser(Guid id)
+    {
+        var employee = await _context.Employees.FirstOrDefaultAsync(item => item.Id == id);
+        if (employee is null)
+            return BadRequest();
+
+        _context.Employees.Remove(employee);
+        await _context.SaveChangesAsync();
+        return RedirectToAction("Index");
+    }
+
+    /// <summary>
+    /// Обновить сотрудника в системе
+    /// </summary>
+    /// <param name="employeeAddDto">Данные по сотруднику</param>
+    [Route("UpdateEmployee"), HttpPost]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateEmployee([FromBody] EmployeeUpdateDto employeeUpdateDto)
+    {
+        var clientInfo = GetAuthUserInfo();
+        if (clientInfo is null)
+            return Unauthorized();
+
+        if (!ModelState.IsValid) return BadRequest();
+
+        var delivery = await _context.Deliveries.FirstOrDefaultAsync(item => item.ClientId == clientInfo.GuidId);
+        if (delivery is null)
+            return Conflict("Ошибка! Заказ на использование небыл оформлен!");
+
+        var client = await _context.Clients.FindAsync(clientInfo.GuidId);
+        if (client is null)
+            return BadRequest();
+
+        if (client.Status == ClientStatus.NotPaid)
+            return Conflict("Ошибка! Аккаунт не был оплачен!");
+
+        var employee = await _context.Employees.FirstOrDefaultAsync(item => item.Id == employeeUpdateDto.Id);
+        if (employee is not null)
+        {
+            employee.Phone = employeeUpdateDto.Phone;
+            employee.Email = employeeUpdateDto.Email;
+            employee.Name = employeeUpdateDto.Name;
+            employee.Surname = employeeUpdateDto.Surname;
+            employee.Patronymic = employeeUpdateDto.Patronymic;
+
+            _context.Employees.Update(employee);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        return BadRequest();
+    }
+
+    /// <summary>
+    /// Получить сотрудника по его ид
+    /// </summary>
+    [Route("GetEmployeeById/{id:guid}"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EmployeeDetailDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetEmployeeById(Guid id)
+    {
+        var employee = await _context.Employees.FirstOrDefaultAsync(x => x.Id == id);
+        if (employee is null)
+            return NotFound();
+
+        var employeeDetailDto = new EmployeeDetailDto
+        {
+            Id = employee.Id,
+            Email = employee.Email,
+            Phone = employee.Phone,
+            Name = employee.Name,
+            Surname = employee.Surname,
+            Patronymic = employee.Patronymic,
+            IsActive = false
+        };
+
+        return Ok(employeeDetailDto);
     }
 
     /// <summary>
@@ -153,6 +233,8 @@ public class ClientsController : Controller
             {
                 Id = item.Id,
                 Name = item.Name,
+                Description = item.Description,
+                Tools = item.Tools
             }).ToListAsync());
     }
 
@@ -176,12 +258,14 @@ public class ClientsController : Controller
         if (client is null)
             return BadRequest();
 
+        var tools = serviceAddDto.Tools.Select(x => x.Name).ToList();
+
         var item = new Service
         {
             Id = Guid.NewGuid(),
             Name = serviceAddDto.Name,
             Description = serviceAddDto.Description,
-            Tools = serviceAddDto.Tools,
+            Tools = tools,
             ClientId = clientInfo.GuidId,
             Client = client
         };
@@ -191,36 +275,112 @@ public class ClientsController : Controller
         return Ok();
     }
 
-/*    [Route("GetClient"), HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClientDto))]
+    /// <summary>
+    /// Удалить пользователя
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [Route("RemoveService/{id:guid}"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RemoveService(Guid id)
+    {
+        var service = await _context.Services.FirstOrDefaultAsync(item => item.Id == id);
+        if (service is null)
+            return BadRequest();
+
+        _context.Services.Remove(service);
+        await _context.SaveChangesAsync();
+        return RedirectToAction("Index");
+    }
+
+    /// <summary>
+    /// Обновить услугу в системе
+    /// </summary>
+    /// <param name="employeeAddDto">Данные по услуге</param>
+    [Route("UpdateService"), HttpPost]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetClient()
+    public async Task<IActionResult> UpdateService([FromBody] ServiceUpdateDto serviceUpdateDto)
     {
         var clientInfo = GetAuthUserInfo();
         if (clientInfo is null)
             return Unauthorized();
 
-        var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == clientInfo.GuidId);
-        if (client is null)
+        if (!ModelState.IsValid) return BadRequest();
+
+        var service = await _context.Services.FirstOrDefaultAsync(item => item.Id == serviceUpdateDto.Id);
+        if (service is not null)
+        {
+            service.Name = serviceUpdateDto.Name;
+            service.Description = serviceUpdateDto.Description;
+            service.Tools = serviceUpdateDto.Tools.Select(x => x.Name).ToList();
+
+            _context.Services.Update(service);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        return BadRequest();
+    }
+
+    /// <summary>
+    /// Получить сотрудника по его ид
+    /// </summary>
+    [Route("GetServiceById/{id:guid}"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ServiceDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetServiceById(Guid id)
+    {
+        var service = await _context.Services.FirstOrDefaultAsync(x => x.Id == id);
+        if (service is null)
             return NotFound();
 
-        var clientDto = new ClientDto()
+        var serviceDto = new ServiceDto
         {
-            Id = client.Id,
-            Login = client.Login,
-            Phone = client.Phone,
-            Email = client.Email,
-            Name = client.Name,
-            Surname = client.Surname,
-            Patronymic = client.Patronymic,
-            Role = client.Role,
-            Status = client.Status
+            Id = service.Id,
+            Name = service.Name,
+            Tools = service.Tools,
+            Description = service.Description
         };
 
-        return Ok(clientDto);
-    }*/
+        return Ok(serviceDto);
+    }
+
+    /*    [Route("GetClient"), HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClientDto))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetClient()
+        {
+            var clientInfo = GetAuthUserInfo();
+            if (clientInfo is null)
+                return Unauthorized();
+
+            var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == clientInfo.GuidId);
+            if (client is null)
+                return NotFound();
+
+            var clientDto = new ClientDto()
+            {
+                Id = client.Id,
+                Login = client.Login,
+                Phone = client.Phone,
+                Email = client.Email,
+                Name = client.Name,
+                Surname = client.Surname,
+                Patronymic = client.Patronymic,
+                Role = client.Role,
+                Status = client.Status
+            };
+
+            return Ok(clientDto);
+        }*/
 
     #region Claims
 

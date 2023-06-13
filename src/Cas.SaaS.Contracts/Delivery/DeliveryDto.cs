@@ -9,18 +9,27 @@ public class DeliveryDto
     /// Идентификатор заявки в системе
     /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// Номер заказа
+    /// </summary>
+    public string NumberDelivery { get; set; } = string.Empty;
+
     /// <summary>
     /// Дата оформления услуги
     /// </summary>
     public DateTime CreatedDate { get; set; }
+
     /// <summary>
     /// Дата окончания услуги
     /// </summary>
     public DateTime EndDate { get; set; }
+
     /// <summary>
     /// Идентификатор клиента
     /// </summary>
     public Guid ClientId { get; set; }
+
     /// <summary>
     /// Идентификатор тариф
     /// </summary>

@@ -1,5 +1,7 @@
-﻿@page "/admin/user/create"
+﻿@page "/admin/user/create/{applicationId:guid}"
+@page "/admin/user/create"
 @using Cas.SaaS.Contracts.Client;
+@using Cas.SaaS.Contracts.Application;
 @inject NavigationManager navigationManager
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpAdminHelper Http
@@ -9,45 +11,79 @@
 
 <h2>Добавление клиента</h2>
 
-﻿<EditForm Model="clientAddDto" OnValidSubmit="OnValidSubmit">
-
-    <div class="form-group p-2">
-        <label for="name">Имя</label>
-        <div>
-            <InputText class="form-control" id="name" @bind-Value="@clientAddDto.Name" />
-        </div>
-
-        <label for="surname">Фамилия</label>
-        <div>
-            <InputText class="form-control" id="surname" @bind-Value="@clientAddDto.Surname" />
-        </div>
-
-        <label for="patronymic">Отчество</label>
-        <div>
-            <InputText class="form-control" id="patronymic" @bind-Value="@clientAddDto.Patronymic" />
-        </div>
-
-        <label for="email">Почтовый адрес</label>
-        <div>
-            <InputText class="form-control" id="email" @bind-Value="@clientAddDto.Email" />
-        </div>
-
-        <label for="phone">Номер телефона</label>
-        <div>
-            <InputText class="form-control" id="phone" @bind-Value="@clientAddDto.Phone" />
+@if (statusAddClient)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
         </div>
     </div>
+}
+else
+{
+    <EditForm Model="clientAddDto" OnValidSubmit="OnValidSubmit">
 
-    <button class="btn btn-primary" type="submit">Добавить</button>
-    <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+        <div class="form-group p-2">
+            <label for="surname">Фамилия</label>
+            <div>
+                <InputText class="form-control" id="surname" @bind-Value="@clientAddDto.Surname" />
+            </div>
 
-</EditForm>
+            <label for="name">Имя</label>
+            <div>
+                <InputText class="form-control" id="name" @bind-Value="@clientAddDto.Name" />
+            </div>
+
+            <label for="patronymic">Отчество</label>
+            <div>
+                <InputText class="form-control" id="patronymic" @bind-Value="@clientAddDto.Patronymic" />
+            </div>
+
+            <label for="email">Почтовый адрес</label>
+            <div>
+                <InputText class="form-control" id="email" @bind-Value="@clientAddDto.Email" />
+            </div>
+
+            <label for="phone">Номер телефона</label>
+            <div>
+                <InputText class="form-control" id="phone" @bind-Value="@clientAddDto.Phone" />
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Добавить</button>
+        <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+
+    </EditForm>
+}
 
 @code {
+    private bool statusAddClient = false;
+
     ClientAddDto clientAddDto = new ClientAddDto();
+    private ApplicationDto? application;
+
+    [Parameter]
+    public Guid applicationId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (applicationId != Guid.Empty)
+        {
+            application = await Http.ApplicationIsCheckAsync(applicationId);
+            var name = application.Name.Split();
+            clientAddDto.Name = name[1];
+            clientAddDto.Surname = name[0];
+            clientAddDto.Patronymic = name[2];
+
+            clientAddDto.Email = application.Email;
+            clientAddDto.Phone = application.Phone;
+        }
+    }
 
     protected async Task OnValidSubmit()
     {
+        statusAddClient = false;
+
         var response = await Http.AddClientAsync(clientAddDto);
 
         var body = await response.Content.ReadAsStringAsync();
@@ -63,6 +99,8 @@
             // not success
             Console.WriteLine(body);
         }
+
+        statusAddClient = true;
     }
 
     private void Clear()

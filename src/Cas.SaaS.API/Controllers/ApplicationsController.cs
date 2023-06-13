@@ -1,5 +1,4 @@
-﻿using Cas.SaaS.API.Helpers;
-using Cas.SaaS.API.Services;
+﻿using Cas.SaaS.API.Services;
 using Cas.SaaS.Contracts.Application;
 using Cas.SaaS.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +13,6 @@ namespace Cas.SaaS.API.Controllers;
 public class ApplicationsController : Controller
 {
     private readonly DatabaseContext _context;
-    private readonly JwtHelper _jwtHelper;
     private readonly EmailSenderService _emailSenderService;
     private readonly ILogger<ApplicationsController> _logger;
 
@@ -25,10 +23,9 @@ public class ApplicationsController : Controller
     /// <param name="logger">Логгер</param>
     /// <param name="jwtReader">Расшифровщик данных пользователя из JWT</param>
     /// <exception cref="ArgumentNullException">Аргумент не инициализирован</exception>
-    public ApplicationsController(DatabaseContext context, JwtHelper jwtHelper, EmailSenderService emailSenderService, ILogger<ApplicationsController> logger)
+    public ApplicationsController(DatabaseContext context, EmailSenderService emailSenderService, ILogger<ApplicationsController> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
-        _jwtHelper = jwtHelper ?? throw new ArgumentNullException(nameof(jwtHelper));
         _emailSenderService = emailSenderService ?? throw new ArgumentNullException(nameof(emailSenderService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -51,9 +48,13 @@ public class ApplicationsController : Controller
         if (!ModelState.IsValid)
             return BadRequest();
 
+        Random rnd = new Random();
+        string genNumber = string.Format("AP-{0}-{1}-{2}", DateTime.UtcNow.Day + rnd.Next(10000), DateTime.UtcNow.Month, DateTime.UtcNow.Year);
+
         var application = new Application
         {
             Id = Guid.NewGuid(),
+            NumberApplication = genNumber,
             Title = applicationAddDto.Title,
             Name = applicationAddDto.Name,
             Description = applicationAddDto.Description,
@@ -85,11 +86,11 @@ public class ApplicationsController : Controller
     /// <response code="200">Список всех заявок</response>
     /// <response code="401">Токен доступа истек</response>
     /// <response code="500">Ошибка сервера</response>
-    [Route("GetApplications/{id:guid}"), HttpGet]
+    [Route("GetApplication/{id:guid}"), HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationDto))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetApplications(Guid id)
+    public async Task<IActionResult> GetApplication(Guid id)
     {
         var application = await _context.Applications.FirstOrDefaultAsync(x => x.Id == id);
         if (application is null)
@@ -98,6 +99,7 @@ public class ApplicationsController : Controller
         var applicationDto = new ApplicationDto
         {
             Id = application.Id,
+            NumberApplication = application.NumberApplication,
             Title = application.Title,
             Name = application.Name,
             Description = application.Description,
@@ -132,6 +134,7 @@ public class ApplicationsController : Controller
             .Select(application => new ApplicationDto
             {
                 Id = application.Id,
+                NumberApplication = application.NumberApplication,
                 Title = application.Title,
                 Name = application.Name,
                 Description = application.Description,
@@ -154,7 +157,7 @@ public class ApplicationsController : Controller
     /// <response code="404">Заявка не найдена</response>
     /// <response code="409">Ошибка в статусе заявки</response>
     /// <response code="500">Ошибка сервера</response>
-    [HttpPost("GetApplications/{id:guid}/statuses")]
+    [HttpPost("GetApplication/{id:guid}/statuses")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -198,7 +201,7 @@ public class ApplicationsController : Controller
     /// <param name="id">Идентификатор</param>
     /// <param name="applicationIsCheckDto">Модель изменения состояния</param>
     /// <returns></returns>
-    [HttpPost("GetApplications/{id:guid}/check")]
+    [HttpPost("GetApplication/{id:guid}/check")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

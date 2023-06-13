@@ -1,5 +1,6 @@
 ﻿@page "/admin/application/{applicationId:guid}"
 @using Cas.SaaS.Contracts.Application;
+@using Cas.SaaS.Contracts.Client;
 @using Cas.SaaS.Models;
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpAdminHelper Http
@@ -111,21 +112,30 @@ else
             </dl>
         </div>
         <hr />
-        <EditForm Model="applicationStatesEditDto" OnValidSubmit="OnValidSubmit">
-            <div class="card card-body">
-                <h4>Статус заявки</h4>
-                <div>
-                    <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" @bind="applicationStatesEditDto.Status">
-                        <option selected>Выберите статус</option>
-                        @foreach (var c in States)
-                        {
-                            <option value="@c.Key">@c.Value</option>
-                        }
-                    </select>
-                </div>
-                <button class="btn btn-primary m-2" type="submit">Изменить статус</button>
+        @if (application.Status == ApplicationStates.Approved)
+        {
+            <div class="form-group">
+                <a class="btn btn-success" href="admin/user/create/@application.Id">Добавить клиента</a>
             </div>
-        </EditForm>
+        }
+        else if (application.Status != ApplicationStates.Rejected)
+        {
+            <EditForm Model="applicationStatesEditDto" OnValidSubmit="OnValidSubmit">
+                <div class="card card-body">
+                    <h4>Статус заявки</h4>
+                    <div>
+                        <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" @bind="applicationStatesEditDto.Status">
+                            <option selected>Выберите статус</option>
+                            @foreach (var c in States)
+                            {
+                                <option value="@c.Key">@c.Value</option>
+                            }
+                        </select>
+                    </div>
+                    <button class="btn btn-primary m-2" type="submit">Изменить статус</button>
+                </div>
+            </EditForm>
+        }
     }
 }
 
@@ -142,7 +152,7 @@ else
 
     private ApplicationDto? application;
 
-    private bool setstatus= false;
+    private bool setstatus = false;
 
     ApplicationStatesEditDto applicationStatesEditDto = new ApplicationStatesEditDto();
     ApplicationResultDTO applicationResultDTO = new ApplicationResultDTO();
@@ -152,8 +162,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
-        timer = new System.Threading.Timer(SetStatus, new System.Threading.AutoResetEvent(false), 1000, 1000);
+        application = await Http.ApplicationIsCheckAsync(applicationId);
     }
 
     protected async Task OnValidSubmit()
@@ -173,11 +182,5 @@ else
         }
 
         setstatus = false;
-    }
-
-    private async void SetStatus(object stateInfo)
-    {
-        application = await Http.ApplicationIsCheckAsync(applicationId, new ApplicationIsCheckDto());
-        await InvokeAsync(StateHasChanged);
     }
 }

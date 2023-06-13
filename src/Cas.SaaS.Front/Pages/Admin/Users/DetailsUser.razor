@@ -24,17 +24,20 @@ else if (userDetail.Id == Guid.Empty)
 else
 {
     <div>
-        <h4>Данные о клиенте</h4>
-        <div class="form-group">
-            <a class="btn btn-success" href="/admin/user/@userDetail.Id/tariff">Добавить заказ</a>
-        </div>
+        <h4>Данные о пользователе</h4>
+        @if (userDetail.Role != Models.UserRoles.Employee)
+        {
+            <div class="form-group">
+                <a class="btn btn-success" href="/admin/user/@userDetail.Id/tariff">Добавить заказ</a>
+            </div>
+        }
         <hr />
         <dl class="row">
             <dt class="col-sm-2">
                 ФИО
             </dt>
             <dd class="col-sm-10">
-                @userDetail.Name @userDetail.Surname @userDetail.Patronymic
+                @userDetail.Surname @userDetail.Name @userDetail.Patronymic
             </dd>
             <dt class="col-sm-2">
                 Логин
@@ -97,7 +100,7 @@ else
                                 {
                                     <tr>
                                         <td>
-                                            @employee.Name @employee.Surname @employee.Patronymic
+                                            @employee.Surname @employee.Name @employee.Patronymic
                                         </td>
                                         <td>
                                             @employee.Login

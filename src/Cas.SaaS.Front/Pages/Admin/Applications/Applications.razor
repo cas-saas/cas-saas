@@ -1,5 +1,6 @@
 ﻿@page "/admin/applications"
 @using Cas.SaaS.Contracts.Application;
+@using Cas.SaaS.Shared;
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpAdminHelper Http
 @attribute [Authorize(Roles = "Admin")]
@@ -16,6 +17,12 @@
         </div>
     </div>
 }
+else if (applicationsView.Count() <= 0)
+{
+    <div class="text-center">
+        <p>Список заявок пуст!</p>
+    </div>
+}
 else
 {
     <div class="row">
@@ -25,7 +32,35 @@ else
                 <div class="position-relative m-3">
                     <div class="card" style="width: 36rem;">
                         <div class="card-body">
-                            <h5 class="card-title">Название организации: @application.Title</h5>
+                            <h5 class="card-title">
+                                Название организации: @application.Title
+                                @switch (application.Status)
+                                {
+                                    case Models.ApplicationStates.New:
+                                        <span class="badge bg-primary m-1">
+                                            @application.Status.GetDisplayName()
+                                        </span>
+                                        break;
+
+                                    case Models.ApplicationStates.InProgress:
+                                        <span class="badge bg-warning m-1">
+                                            @application.Status.GetDisplayName()
+                                        </span>
+                                        break;
+
+                                    case Models.ApplicationStates.Rejected:
+                                        <span class="badge bg-danger m-1">
+                                            @application.Status.GetDisplayName()
+                                        </span>
+                                        break;
+
+                                    case Models.ApplicationStates.Approved:
+                                        <span class="badge bg-success m-1">
+                                            @application.Status.GetDisplayName()
+                                        </span>
+                                        break;
+                                }
+                            </h5>
                             <h6 class="card-subtitle mb-2 text-muted">Идентификатор: @application.Id</h6>
                             <p class="card-text">
                                 <div class="p-3 bg-info bg-opacity-10 border border-info border-start-0 rounded-end">
@@ -55,33 +90,7 @@ else
     {
         applications = await Http.GetApplicationsAsync();
 
-        applicationsView = applications.Where(x => x.Status != Models.ApplicationStates.Rejected).ToList();
+        applicationsView = applications.Where(x => x.Status != Models.ApplicationStates.Rejected 
+            && x.Status != Models.ApplicationStates.Approved).ToList();
     }
 }
-
-@*@switch (application.Status)
-{
-    case Models.ApplicationStates.New:
-        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-primary border border-light rounded-circle">
-            <span class="visually-hidden">Новая</span>
-        </span>
-        break;
-
-    case Models.ApplicationStates.InProgress:
-        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-warning border border-light rounded-circle">
-            <span class="visually-hidden">Рассматривается</span>
-        </span>
-        break;
-
-    case Models.ApplicationStates.Rejected:
-        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
-            <span class="visually-hidden">Отклонена</span>
-        </span>
-        break;
-
-    case Models.ApplicationStates.Approved:
-        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle">
-            <span class="visually-hidden">Одобрена</span>
-        </span>
-        break;
-}*@

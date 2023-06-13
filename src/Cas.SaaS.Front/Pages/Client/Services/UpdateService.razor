@@ -1,0 +1,165 @@
+﻿@page "/service/{serviceId:guid}/update"
+@using Cas.SaaS.Contracts.Service;
+@using Cas.SaaS.Shared;
+@using Microsoft.AspNetCore.Authorization;
+@inject NavigationManager navigationManager
+@inject Helpers.HttpClientHelper Http
+@inject IJSRuntime JS
+@attribute [Authorize(Roles = "Client")]
+
+<PageTitle>Обновления данных услуги</PageTitle>
+
+@if (status)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div>
+        <h4>Данные о услуге</h4>
+        <hr />
+        ﻿<EditForm Model="serviceUpdateDto" OnValidSubmit="OnValidSubmit">
+
+            <div class="form-group p-2">
+                <label for="name">Название услуги</label>
+                <div>
+                    <InputText class="form-control" id="name" @bind-Value="@serviceUpdateDto.Name" />
+                </div>
+
+                <label for="description">Описание услуги</label>
+                <div>
+                    <InputText class="form-control" id="description" @bind-Value="@serviceUpdateDto.Description" />
+                </div>
+
+                <label for="tools">Инструменты</label>
+
+                @if (addedTools)
+                {
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="col-sm-4">#</th>
+                                <th class="col-sm-8">Название инструмента</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tool in serviceUpdateDto.Tools)
+                            {
+                                <tr>
+                                    <td>@tool.Id</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <InputText class="form-control" id="tool" @bind-Value="@tool.Name" />
+                                            <span class="btn btn-danger" type="button" @onclick="RemoveTool">X</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                <div>
+                    <button class="btn btn-primary" type="button" @onclick="AddTool">Добавить инструмент</button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" type="submit">Обновить</button>
+            <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+
+        </EditForm>
+    </div>
+}
+
+@code {
+    private bool status = false;
+    public int count { get; set; } = 0;
+    private bool addedTools = false;
+
+    [Parameter]
+    public Guid serviceId { get; set; }
+
+    private ServiceDto? service;
+
+    ServiceUpdateDto serviceUpdateDto = new ServiceUpdateDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        addedTools = true;
+
+        service = await Http.GetServiceByIdAsync(serviceId);
+
+        count = service.Tools.Count();
+
+        serviceUpdateDto.Id = service.Id; 
+        serviceUpdateDto.Name = service.Name;
+        serviceUpdateDto.Description = service.Description;
+        int i = 0;
+        foreach (var item in service.Tools)
+        {
+            i++;
+            var temp = new Tool
+            {
+                Id = i,
+                Name = item
+            };
+            serviceUpdateDto.Tools.Add(temp);
+        }
+    }
+
+    protected async Task OnValidSubmit()
+    {
+        status = false;
+
+        var response = await Http.UpdateServiceAsync(serviceUpdateDto);
+
+        var body = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
+        {
+            // success
+            Console.WriteLine($"the id of the service is: {body}");
+            navigationManager.NavigateTo($"/services");
+        }
+        else
+        {
+            // not success
+            Console.WriteLine(body);
+        }
+
+        status = true;
+    }
+
+    private void AddTool()
+    {
+        addedTools = true;
+        count++;
+        serviceUpdateDto.Tools.Add(new Tool()
+            {
+                Id = count,
+                Name = string.Empty
+            });
+        base.OnInitializedAsync();
+    }
+
+    private void RemoveTool()
+    {
+        count--;
+        var t = serviceUpdateDto.Tools.Last();
+        serviceUpdateDto.Tools.Remove(t);
+        if (serviceUpdateDto.Tools.Count == 0)
+        {
+            addedTools = false;
+        }
+        base.OnInitializedAsync();
+    }
+
+    private void Clear()
+    {
+        count = 0;
+        serviceUpdateDto = new ServiceUpdateDto();
+    }
+}

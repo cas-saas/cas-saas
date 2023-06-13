@@ -1,24 +1,26 @@
+using Cas.SaaS.Contracts.Delivery;
+using Cas.SaaS.Contracts.Employee;
 using Cas.SaaS.Models;
 
-namespace Cas.SaaS.Contracts.Employee;
+namespace Cas.SaaS.Contracts.User;
 
 /// <summary>
-/// Модель вывода деталей сотрудника
+/// Модель обновления клиента
 /// </summary>
-public class EmployeeDetailDto
+public class UserUpdateDto
 {
     /// <summary>
-    /// Идентификатор сотрудника
+    /// Идентификатор пользователя
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Номер телефона
+    /// Номер телефона пользователя
     /// </summary>
     public string Phone { get; set; } = string.Empty;
 
     /// <summary>
-    /// Почтовый адрес
+    /// Почтовый адрес пользователя
     /// </summary>
     public string Email { get; set; } = string.Empty;
 
@@ -38,7 +40,7 @@ public class EmployeeDetailDto
     public string? Patronymic { get; set; }
 
     /// <summary>
-    /// Активен ли сотрудник
+    /// Статус пользователя
     /// </summary>
-    public bool IsActive { get; set; }
+    public ClientStatus Status { get; set; } = ClientStatus.None;
 }

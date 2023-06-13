@@ -1,8 +1,10 @@
 ﻿using Cas.SaaS.Client.Services;
 using Cas.SaaS.Contracts.Application;
+using Cas.SaaS.Contracts.Brigade;
 using Cas.SaaS.Contracts.Client;
 using Cas.SaaS.Contracts.Delivery;
 using Cas.SaaS.Contracts.Employee;
+using Cas.SaaS.Contracts.TariffPlan;
 using Cas.SaaS.Contracts.User;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
@@ -49,7 +51,7 @@ public class HttpAdminHelper
     }
 
     /// <summary>
-    /// Получить список пользователей
+    /// Удалить пользователя по ид
     /// </summary>
     /// <returns></returns>
     public async Task<Guid> DeleteUserById(Guid id)
@@ -163,6 +165,29 @@ public class HttpAdminHelper
     }
 
     /// <summary>
+    /// Обновить пользователя
+    /// </summary>
+    /// <returns></returns>
+    public async Task<HttpResponseMessage> UpdateUserAsync(UserUpdateDto userUpdateDto)
+    {
+        try
+        {
+            var token = await _tokenService.GetToken();
+
+            if (token != null && token.Expiration > DateTime.UtcNow)
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
+            }
+
+            return await _http.PostAsJsonAsync("api/Users/UpdateUser", userUpdateDto);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Добавить заказ клиента
     /// </summary>
     /// <returns></returns>
@@ -189,7 +214,7 @@ public class HttpAdminHelper
     /// Детали заявки по идентификатору
     /// </summary>
     /// <returns></returns>
-    public async Task<ApplicationDto> ApplicationIsCheckAsync(Guid id, ApplicationIsCheckDto checkDto)
+    public async Task<ApplicationDto> ApplicationIsCheckAsync(Guid id)
     {
         try
         {
@@ -200,9 +225,9 @@ public class HttpAdminHelper
                 _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
             }
 
-            await _http.PostAsJsonAsync($"api/Applications/GetApplications/{id}/check", checkDto);
+            await _http.PostAsJsonAsync($"api/Applications/GetApplication/{id}/check", new ApplicationIsCheckDto());
 
-            return await _http.GetFromJsonAsync<ApplicationDto>($"api/Applications/GetApplications/{id}");
+            return await _http.GetFromJsonAsync<ApplicationDto>($"api/Applications/GetApplication/{id}");
         }
         catch
         {
@@ -226,7 +251,7 @@ public class HttpAdminHelper
                 _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
             }
 
-            var response = await _http.PostAsJsonAsync($"api/Applications/GetApplications/{id}/statuses", applicationStatesEditDto);
+            var response = await _http.PostAsJsonAsync($"api/Applications/GetApplication/{id}/statuses", applicationStatesEditDto);
             var result = await response.Content.ReadFromJsonAsync<ApplicationResultDTO>();
             return result;
         }
@@ -265,6 +290,74 @@ public class HttpAdminHelper
         }
     }
 
+    /// <summary>
+    /// Тарифный план по идентификатору
+    /// </summary>
+    /// <returns></returns>
+    public async Task<TariffPlanDto> GetTariffPlanByIdAsync(Guid id)
+    {
+        try
+        {
+            var token = await _tokenService.GetToken();
+
+            if (token != null && token.Expiration > DateTime.UtcNow)
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
+            }
+
+            return await _http.GetFromJsonAsync<TariffPlanDto>($"api/Tariffs/GetTariffById/{id}");
+        }
+        catch
+        {
+            return new TariffPlanDto();
+        }
+    }
+
+    /// <summary>
+    /// Добавить тарифный план
+    /// </summary>
+    /// <returns></returns>
+    public async Task<HttpResponseMessage> AddTariffPlanAsync(TariffPlanAddDto tariffPlanAddDto)
+    {
+        try
+        {
+            var token = await _tokenService.GetToken();
+
+            if (token != null && token.Expiration > DateTime.UtcNow)
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
+            }
+
+            return await _http.PostAsJsonAsync("api/Tariffs/AddTariff", tariffPlanAddDto);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Обновить тарифный план
+    /// </summary>
+    /// <returns></returns>
+    public async Task<HttpResponseMessage> UpdateTariffPlanAsync(TariffPlanUpdateDto tariffPlanUpdateDto)
+    {
+        try
+        {
+            var token = await _tokenService.GetToken();
+
+            if (token != null && token.Expiration > DateTime.UtcNow)
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
+            }
+
+            return await _http.PostAsJsonAsync("api/Tariffs/UpdateTariff", tariffPlanUpdateDto);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
     public string RandomString(int size, bool lowerCase)
     {
         StringBuilder builder = new StringBuilder();

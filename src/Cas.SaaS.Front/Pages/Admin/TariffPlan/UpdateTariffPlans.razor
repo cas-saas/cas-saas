@@ -1,11 +1,11 @@
-﻿@page "/admin/user/{userId:guid}/update"
-@using Cas.SaaS.Contracts.User;
+﻿@page "/admin/tariff/{tariffId:guid}/update"
+@using Cas.SaaS.Contracts.TariffPlan;
 @inject NavigationManager navigationManager
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpAdminHelper Http
 @attribute [Authorize(Roles = "Admin")]
 
-<PageTitle>Обновления данных пользователя</PageTitle>
+<PageTitle>Обновления данных тарифного плана</PageTitle>
 
 @if (status)
 {
@@ -18,48 +18,48 @@
 else
 {
     <div>
-        <h4>Данные о клиенте</h4>
+        <h4>Данные о тарифном плане</h4>
         <hr />
-        <EditForm Model="userUpdateDto" OnValidSubmit="OnValidSubmit">
+        <EditForm Model="tariffPlanUpdateDto" OnValidSubmit="OnValidSubmit">
             <dl class="row">
                 <dt class="col-sm-2">
-                    Имя
+                    Заголовок
                 </dt>
                 <dd class="col-sm-10">
                     <div>
-                        <InputText class="form-control" id="name" @bind-Value="@userUpdateDto.Name" />
+                        <InputText class="form-control" id="title" @bind-Value="@tariffPlanUpdateDto.Title" />
                     </div>
                 </dd>
                 <dt class="col-sm-2">
-                    Фамилия
+                    Период оплаты
                 </dt>
                 <dd class="col-sm-10">
                     <div>
-                        <InputText class="form-control" id="name" @bind-Value="@userUpdateDto.Surname" />
+                        <InputNumber class="form-control" id="payment" @bind-Value="@tariffPlanUpdateDto.Payment" />
                     </div>
                 </dd>
                 <dt class="col-sm-2">
-                    Отчество
+                    Цена
                 </dt>
                 <dd class="col-sm-10">
                     <div>
-                        <InputText class="form-control" id="name" @bind-Value="@userUpdateDto.Patronymic" />
+                        <InputNumber class="form-control" id="price" @bind-Value="@tariffPlanUpdateDto.Price" />
                     </div>
                 </dd>
                 <dt class="col-sm-2">
-                    Почтовый адрес
+                    Количество доступных сотрудников
                 </dt>
                 <dd class="col-sm-10">
                     <div>
-                        <InputText class="form-control" id="name" @bind-Value="@userUpdateDto.Email" />
+                        <InputNumber class="form-control" id="phone" @bind-Value="@tariffPlanUpdateDto.CountEmployees" />
                     </div>
                 </dd>
                 <dt class="col-sm-2">
-                    Номер телефона
+                    Описание
                 </dt>
                 <dd class="col-sm-10">
                     <div>
-                        <InputText class="form-control" id="name" @bind-Value="@userUpdateDto.Phone" />
+                        <InputTextArea class="form-control" id="description" @bind-Value="@tariffPlanUpdateDto.Description" />
                     </div>
                 </dd>
             </dl>
@@ -74,29 +74,29 @@ else
     private bool status = false;
 
     [Parameter]
-    public Guid userId { get; set; }
+    public Guid tariffId { get; set; }
 
-    private UserDetailDto? userDetail;
+    private TariffPlanDto? tariffPlanDto;
 
-    UserUpdateDto userUpdateDto = new UserUpdateDto();
+    TariffPlanUpdateDto tariffPlanUpdateDto = new TariffPlanUpdateDto();
 
     protected override async Task OnInitializedAsync()
     {
-        userDetail = await Http.GetClientByIdAsync(userId);
+        tariffPlanDto = await Http.GetTariffPlanByIdAsync(tariffId);
 
-        userUpdateDto.Id = userDetail.Id;
-        userUpdateDto.Name = userDetail.Name;
-        userUpdateDto.Surname = userDetail.Surname;
-        userUpdateDto.Patronymic = userDetail.Patronymic;
-        userUpdateDto.Email = userDetail.Email;
-        userUpdateDto.Phone = userDetail.Phone;
+        tariffPlanUpdateDto.Id = tariffPlanDto.Id;
+        tariffPlanUpdateDto.Title = tariffPlanDto.Title;
+        tariffPlanUpdateDto.Payment = tariffPlanDto.Payment;
+        tariffPlanUpdateDto.Price = tariffPlanDto.Price;
+        tariffPlanUpdateDto.Description = tariffPlanDto.Description;
+        tariffPlanUpdateDto.CountEmployees = tariffPlanDto.CountEmployees;
     }
 
     protected async Task OnValidSubmit()
     {
         status = false;
 
-        var response = await Http.UpdateUserAsync(userUpdateDto);
+        var response = await Http.UpdateTariffPlanAsync(tariffPlanUpdateDto);
 
         var body = await response.Content.ReadAsStringAsync();
 
@@ -104,7 +104,7 @@ else
         {
             // success
             Console.WriteLine($"the id of the user is: {body}");
-            navigationManager.NavigateTo($"/admin/user/{userId}/details");
+            navigationManager.NavigateTo($"/admin/tariffs");
         }
         else
         {
@@ -117,6 +117,6 @@ else
 
     private void Clear()
     {
-        userUpdateDto = new UserUpdateDto();
+        tariffPlanUpdateDto = new TariffPlanUpdateDto();
     }
 }

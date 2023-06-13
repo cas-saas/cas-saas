@@ -1,0 +1,206 @@
+﻿@page "/brigade/{brigadeId:guid}/details"
+@using Cas.SaaS.Contracts.Brigade;
+@using Cas.SaaS.Shared;
+@using Microsoft.AspNetCore.Authorization;
+@inject NavigationManager navigationManager
+@inject Helpers.HttpClientHelper Http
+@attribute [Authorize(Roles = "Client")]
+
+<PageTitle>Детали наряда</PageTitle>
+
+@if (brigadeDetailDto is null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else if (brigadeDetailDto.Id == Guid.Empty)
+{
+    <div class="text-center">
+        <p>Данного наряда нет в системе!</p>
+    </div>
+}
+else
+{
+    @if (setstatus)
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>
+            <h1>
+                Состояние наряда
+                @switch (brigadeDetailDto.Status)
+                {
+                    case Models.BrigadeStates.New:
+                        <span class="badge bg-primary">
+                            Новая
+                        </span>
+                        break;
+
+                    case Models.BrigadeStates.InProgress:
+                        <span class="badge bg-warning">
+                            В работе
+                        </span>
+                        break;
+
+                    case Models.BrigadeStates.RejectedByEmployee:
+                        <span class="badge bg-danger">
+                            Отклонена сотрудником
+                        </span>
+                        break;
+
+                    case Models.BrigadeStates.CanceledByClient:
+                        <span class="badge bg-danger">
+                            Отменена клиентом
+                        </span>
+                        break;
+
+                    case Models.BrigadeStates.Completed:
+                        <span class="badge bg-success">
+                            Завершена
+                        </span>
+                        break;
+                }
+            </h1>
+            <div>
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        Номер наряда
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.NumberBrigade
+                    </dd>
+                    <dt class="col-sm-2">
+                        Статус
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.Status.GetDisplayName()
+                    </dd>
+                    <dt class="col-sm-2">
+                        Название услуги
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.ServiceId
+                    </dd>
+                    <dt class="col-sm-2">
+                        ФИО заказчика
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.Customer
+                    </dd>
+                    <dt class="col-sm-2">
+                        Номер телефона заказчика
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.Phone
+                    </dd>
+                    <dt class="col-sm-2">
+                        Адрес заказчика
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.Address
+                    </dd>
+                    <dt class="col-sm-2">
+                        Описание заказа
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.Description
+                    </dd>
+                    <dt class="col-sm-2">
+                        Дата начала работ
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.StartDate
+                    </dd>
+                    <dt class="col-sm-2">
+                        Дата окончания работ
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.EndDate
+                    </dd>
+                    <dt class="col-sm-2">
+                        Дата создания наряда
+                    </dt>
+                    <dd class="col-sm-10">
+                        @brigadeDetailDto.CreatedDate
+                    </dd>
+                </dl>
+            </div>
+            <hr />
+            @if (brigadeDetailDto.Status != Models.BrigadeStates.CanceledByClient 
+           && brigadeDetailDto.Status != Models.BrigadeStates.RejectedByEmployee)
+            {
+                <div>
+                    <EditForm Model="brigadeStatesEditDto" OnValidSubmit="OnValidSubmit">
+                        <div class="card card-body">
+                            <h4>Статус наряда</h4>
+                            <div>
+                                <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" @bind="brigadeStatesEditDto.Status">
+                                    <option selected>Выберите статус</option>
+                                    @foreach (var c in States)
+                                    {
+                                        <option value="@c.Key">@c.Value</option>
+                                    }
+                                </select>
+                            </div>
+                            <button class="btn btn-primary m-2" type="submit">Изменить статус</button>
+                        </div>
+                    </EditForm>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    public Dictionary<int, string> States = new Dictionary<int, string>()
+    {
+        { 0, "Новая" },
+        { 1, "В работе" },
+        { 2, "Завершена" },
+        { 3, "Отменена клиентом" },
+        { 4, "Отклонена сотрудником" },
+    };
+
+    [Parameter]
+    public Guid brigadeId { get; set; }
+
+    private bool setstatus = false;
+
+    BrigadeStatesEditDto brigadeStatesEditDto = new BrigadeStatesEditDto();
+    private BrigadeDetailDto? brigadeDetailDto;
+    BrigadeResultDTO brigadeResultDTO = new BrigadeResultDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        brigadeDetailDto = await Http.GetBrigadeByIdAsync(brigadeId);
+    }
+
+    protected async Task OnValidSubmit()
+    {
+        setstatus = true;
+
+        var response = await Http.EditBrigadeStateAsync(brigadeId, brigadeStatesEditDto);
+
+        if (response.Succeeded)
+        {
+            brigadeResultDTO = response;
+        }
+        else
+        {
+            var errors = new Dictionary<string, List<string>>();
+            errors.Add("", new List<string> { response.Message });
+        }
+
+        setstatus = false;
+        await OnInitializedAsync();
+    }
+}

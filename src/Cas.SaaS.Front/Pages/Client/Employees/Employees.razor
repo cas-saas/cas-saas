@@ -40,13 +40,13 @@ else
             @foreach (var employee in employees)
             {
                 <tr>
-                    <td>@employee.Name @employee.Surname @employee.Patronymic</td>
+                    <td>@employee.Surname @employee.Name @employee.Patronymic</td>
                     <td>@employee.Phone</td>
                     <th>
                         <div class="row">
                             <a href="/employee/@employee.Id/update" class="btn btn-primary col m-1">Обновить</a>
                             <a href="/employee/@employee.Id/details" class="btn btn-info col text-white m-1">Детали</a>
-                            <a href="/employee/@employee.Id/remove" class="btn btn-danger col m-1">Удалить</a>
+                            <button @onclick="() => EmployeeDeleteAsync(employee.Id)" class="btn btn-danger col m-1">Удалить</button>
                         </div>
                     </th>
                 </tr>
@@ -61,5 +61,11 @@ else
     protected override async Task OnInitializedAsync()
     {
         employees = await Http.GetEmployeesAsync();
+    }
+
+    public async Task EmployeeDeleteAsync(Guid id)
+    {
+        await Http.DeleteEmployeeById(id);
+        await OnInitializedAsync();
     }
 }

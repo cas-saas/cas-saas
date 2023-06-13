@@ -6,6 +6,12 @@
 
 <PageTitle>Тарифные планы</PageTitle>
 
+<h1>Список тарифных планов</h1>
+
+<div class="form-group">
+    <a class="btn btn-success" href="admin/tariff/create">Добавить тарифный план</a>
+</div>
+
 @if (tariffs is null)
 {
     <div class="d-flex justify-content-center">
@@ -16,27 +22,33 @@
 }
 else
 {
+    <div class="row">
     @foreach (var item in tariffs)
     {
-        <div class="card mb-3" style="max-width: 540px;">
-            <div class="row g-0">
-                <div class="col-md-1 bg-primary">
-                </div>
-                <div class="col-md-8">
-                    <div class="card-body">
-                        <p class="card-text"><small class="text-muted">Идентификатор тарифа: @item.Id</small></p>
-                        <hr>
-                        <h4 class="card-title">Название: @item.Title</h4>
-                        <p class="card-text">Описание: @item.Description</p>
-                        <p class="card-text">Цена: @item.Price рублей</p>
-                        <p class="card-text"><small class="text-muted">Период оплаты каждые @item.Payment дней</small></p>
-                        <p class="card-text"><small class="text-muted">Количество сотрудников для добавления: @item.CountEmployees</small></p>
+        <div class="col-sm-6">
+            <div class="position-relative m-3">
+                <div class="card" style="max-width: 540px;">
+                    <div class="row g-0">
+                        <div class="col-md-1 bg-primary">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <p class="card-text"><small class="text-muted">Идентификатор тарифа: @item.Id</small></p>
+                                <hr>
+                                <h4 class="card-title">Название: @item.Title</h4>
+                                <p class="card-text">Описание: @item.Description</p>
+                                <p class="card-text">Цена: @item.Price рублей</p>
+                                <p class="card-text"><small class="text-muted">Период оплаты каждые @item.Payment дней</small></p>
+                                <p class="card-text"><small class="text-muted">Количество сотрудников для добавления: @item.CountEmployees</small></p>
+                            </div>
+                            <a class="btn btn-primary m-2" href="admin/tariff/@item.Id/update">Изменить</a>
+                        </div>
                     </div>
-                    <a class="btn btn-primary m-2" href="admin/tariffs/@item.Id/update">Изменить</a>
                 </div>
             </div>
         </div>
     }
+    </div>
 }
 
 @code {

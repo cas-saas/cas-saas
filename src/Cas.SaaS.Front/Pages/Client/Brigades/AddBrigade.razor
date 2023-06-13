@@ -1,0 +1,126 @@
+﻿@page "/brigade/create"
+@using Cas.SaaS.Contracts.Brigade;
+@using Cas.SaaS.Contracts.Service;
+@using Cas.SaaS.Contracts.Employee;
+@using Microsoft.AspNetCore.Authorization;
+@inject NavigationManager navigationManager
+@inject Helpers.HttpClientHelper Http
+@attribute [Authorize(Roles = "Client")]
+
+<PageTitle>Добавление наряда</PageTitle>
+
+<h2>Добавление наряда</h2>
+
+<EditForm Model="brigadeAddDto" OnValidSubmit="OnValidSubmit">
+
+    <div class="form-group p-2">
+        <label for="fio">ФИО заказчика</label>
+        <div>
+            <InputText class="form-control" id="fio" @bind-Value="@brigadeAddDto.Customer" />
+        </div>
+
+        <label for="phone">Номер заказчика</label>
+        <div>
+            <InputText class="form-control" id="phone" @bind-Value="@brigadeAddDto.Phone" />
+        </div>
+
+        <label for="address">Адрес заказа</label>
+        <div>
+            <InputText class="form-control" id="address" @bind-Value="@brigadeAddDto.Address" />
+        </div>
+
+        <label for="description">Комментраии к наряду</label>
+        <div>
+            <InputTextArea class="form-control" id="description" @bind-Value="@brigadeAddDto.Description" />
+        </div>
+
+        <label for="startDate">Дата начала работы</label>
+        <div>
+            <InputDate class="form-control" id="startDate" @bind-Value="@brigadeAddDto.StartDate" />
+        </div>
+
+        <label for="serviceId">Оказание услуги</label>
+        <div>
+            @if (services is null)
+            {
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <InputSelect @bind-Value="@brigadeAddDto.ServiceId" id="serviceId" class="form-control">
+                    @foreach (var service in services)
+                    {
+                        <option value="@service.Id">@service.Name</option>
+                    }
+                </InputSelect>
+            }
+        </div>
+
+        <label for="employeesId">Ответственные за наряд</label>
+        <div>
+        @if (employees is null)
+        {
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+
+            <InputSelect @bind-Value="@brigadeAddDto.EmployeesId" id="employeesId" class="form-control" multiple>
+                @foreach (var employee in employees) 
+                {
+                    <option value="@employee.Id">@($"{employee.Surname} {employee.Name} {employee.Patronymic}")</option>
+                }
+            </InputSelect>
+        }
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Добавить</button>
+    <button class="btn btn-secondary" type="button" @onclick="Clear">Очистить форму</button>
+
+</EditForm>
+
+@code {
+    public BrigadeAddDto brigadeAddDto = new();
+    private EmployeeDto[]? employees;
+    private ServiceDto[]? services;
+    private bool addedEmployee = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        services = await Http.GetServicesAsync();
+        employees = await Http.GetEmployeesAsync();
+    }
+
+    protected async Task OnValidSubmit()
+    {
+        var response = await Http.AddBrigadeAsync(brigadeAddDto);
+
+        var body = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
+        {
+            // success
+            Console.WriteLine($"the id of the brigade is: {body}");
+            navigationManager.NavigateTo("brigades");
+        }
+        else
+        {
+            // not success
+            Console.WriteLine(body);
+        }
+    }
+
+    private void Clear()
+    {
+        brigadeAddDto = new BrigadeAddDto();
+    }
+}

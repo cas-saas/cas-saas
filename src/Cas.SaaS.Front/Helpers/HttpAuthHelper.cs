@@ -101,7 +101,7 @@ public class HttpAuthHelper
                 _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer", $"{token.AccessToken}");
             }
 
-            return await _http.GetFromJsonAsync<ApplicationDto>($"api/Applications/GetApplications/{id}");
+            return await _http.GetFromJsonAsync<ApplicationDto>($"api/Applications/GetApplication/{id}");
         }
         catch
         {

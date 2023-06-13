@@ -1,4 +1,7 @@
-﻿using Cas.SaaS.Contracts.TariffPlan;
+﻿using Cas.SaaS.Contracts.Delivery;
+using Cas.SaaS.Contracts.Employee;
+using Cas.SaaS.Contracts.TariffPlan;
+using Cas.SaaS.Contracts.User;
 using Cas.SaaS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -69,5 +72,56 @@ public class TariffsController : Controller
         await _context.TariffPlans.AddAsync(item);
         await _context.SaveChangesAsync();
         return Ok(item.Id);
+    }
+
+    /// <summary>
+    /// Получить тарифный план по его ид
+    /// </summary>
+    [Route("GetTariffById/{id:guid}"), HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TariffPlanDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetTariffById(Guid id)
+    {
+        var tariff = await _context.TariffPlans.FirstOrDefaultAsync(x => x.Id == id);
+        if (tariff is null)
+            return NotFound();
+
+        var tariffPlanDto = new TariffPlanDto
+        {
+            Id = tariff.Id,
+            Title = tariff.Title,
+            Payment = tariff.Payment,
+            Price = tariff.Price,
+            Description = tariff.Description,
+            CountEmployees = tariff.CountEmployees
+        };
+
+        return Ok(tariffPlanDto);
+    }
+
+    /// <summary>
+    /// Обновить данные тарифного плана
+    /// </summary>
+    /// <param name="tariffPlanUpdateDto">Данные по тарифу</param>
+    [Route("UpdateTariff"), HttpPost]
+    public async Task<IActionResult> UpdateUser([FromBody] TariffPlanUpdateDto tariffPlanUpdateDto)
+    {
+        if (!ModelState.IsValid) return BadRequest();
+
+        var tariff = await _context.TariffPlans.FirstOrDefaultAsync(item => item.Id == tariffPlanUpdateDto.Id);
+        if (tariff is null)
+            return BadRequest();
+
+        tariff.Id = tariffPlanUpdateDto.Id;
+        tariff.Title = tariffPlanUpdateDto.Title;
+        tariff.Payment = tariffPlanUpdateDto.Payment;
+        tariff.Price = tariffPlanUpdateDto.Price;
+        tariff.Description = tariffPlanUpdateDto.Description;
+        tariff.CountEmployees = tariffPlanUpdateDto.CountEmployees;
+
+        _context.TariffPlans.Update(tariff);
+        await _context.SaveChangesAsync();
+        return Ok(tariff.Id);
     }
 }

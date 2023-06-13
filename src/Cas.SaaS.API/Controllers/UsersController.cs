@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Cas.SaaS.Contracts.Client;
 using Cas.SaaS.Contracts.Employee;
 using Cas.SaaS.Contracts.Delivery;
+using Cas.SaaS.API.Services;
 
 namespace Cas.SaaS.API.Controllers;
 
@@ -15,6 +16,7 @@ namespace Cas.SaaS.API.Controllers;
 public class UsersController : Controller
 {
     private readonly DatabaseContext _context;
+    private readonly EmailSenderService _emailSenderService;
     private readonly ILogger<UsersController> _logger;
 
     /// <summary>
@@ -22,9 +24,10 @@ public class UsersController : Controller
     /// </summary>
     /// <param name="context">Контекст базы данных</param>
     /// <param name="logger">Логгер</param>
-    public UsersController(DatabaseContext context, ILogger<UsersController> logger)
+    public UsersController(DatabaseContext context, EmailSenderService emailSenderService, ILogger<UsersController> logger)
     {
         _context = context;
+        _emailSenderService = emailSenderService;
         _logger = logger;
     }
 
@@ -76,11 +79,11 @@ public class UsersController : Controller
     /// <summary>
     /// Получить всех сотрудников с клиента по его ид
     /// </summary>
-    [Route("GetEmployeesById/{id:guid}"), HttpGet]
+    [Route("GetEmployeesByClientId/{id:guid}"), HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<EmployeeDto>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetEmployeesById(Guid id)
+    public async Task<IActionResult> GetEmployeesByClientId(Guid id)
     {
         return Ok(await _context.Employees.Where(x => x.ClientId == id)
             .Select(item => new EmployeeDto
@@ -98,7 +101,7 @@ public class UsersController : Controller
     }
 
     /// <summary>
-    /// Получить клиента по его ид
+    /// Получить пользователя по его ид
     /// </summary>
     [Route("GetUserById/{id:guid}"), HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDetailDto))]
@@ -135,6 +138,7 @@ public class UsersController : Controller
             Select(item => new DeliveryDto
             {
                 Id = item.Id,
+                NumberDelivery = item.NumberDelivery,
                 CreatedDate = item.CreatedDate,
                 EndDate = item.EndDate,
                 ClientId = item.ClientId,
@@ -170,20 +174,6 @@ public class UsersController : Controller
     {
         if (!ModelState.IsValid) return BadRequest();
 
-        var client = await _context.Clients.FirstOrDefaultAsync(item => item.Login == clientAddDto.Login);
-        if (client is not null)
-        {
-            client.Phone = clientAddDto.Phone;
-            client.Email = clientAddDto.Email;
-            client.Name = clientAddDto.Name;
-            client.Surname = clientAddDto.Surname;
-            client.Patronymic = clientAddDto.Patronymic != null ? clientAddDto.Patronymic : null;
-
-            _context.Clients.Update(client);
-            await _context.SaveChangesAsync();
-            return Ok(client.Id);
-        }
-
         var item = new Cas.SaaS.Models.Client
         {
             Id = Guid.NewGuid(),
@@ -198,9 +188,35 @@ public class UsersController : Controller
             Role = UserRoles.Client,
         };
 
+        await _emailSenderService.SendData(item);
+
         await _context.Clients.AddAsync(item);
         await _context.SaveChangesAsync();
         return Ok(item.Id);
+    }
+
+    /// <summary>
+    /// Обновить данные пользователя
+    /// </summary>
+    /// <param name="userUpdateDto">Данные по клиенту</param>
+    [Route("UpdateUser"), HttpPost]
+    public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto userUpdateDto)
+    {
+        if (!ModelState.IsValid) return BadRequest();
+
+        var user = await _context.Users.FirstOrDefaultAsync(item => item.Id == userUpdateDto.Id);
+        if (user is null)
+            return BadRequest();
+
+        user.Name = userUpdateDto.Name;
+        user.Surname = userUpdateDto.Surname;
+        user.Patronymic = userUpdateDto.Patronymic;
+        user.Phone = userUpdateDto.Phone;
+        user.Email = userUpdateDto.Email;
+
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+        return Ok(user.Id);
     }
 
     /// <summary>
@@ -235,6 +251,7 @@ public class UsersController : Controller
             .Select(item => new DeliveryDto
             {
                 Id = item.Id,
+                NumberDelivery = item.NumberDelivery,
                 CreatedDate = item.CreatedDate,
                 EndDate = item.EndDate,
                 ClientId = item.ClientId,
@@ -264,12 +281,15 @@ public class UsersController : Controller
             return BadRequest();
 
         client.Status = ClientStatus.Paid;
-        await _context.Clients.AddAsync(client);
-        await _context.SaveChangesAsync();
+        _context.Clients.Update(client);
+
+        Random rnd = new Random();
+        string genNumber = string.Format("DR-{0}-{1}-{2}", DateTime.UtcNow.Day + rnd.Next(10000), DateTime.UtcNow.Month, DateTime.UtcNow.Year);
 
         var item = new Delivery
         {
             Id = Guid.NewGuid(),
+            NumberDelivery = genNumber,
             CreatedDate = DateTime.UtcNow,
             EndDate = DateTime.UtcNow.AddDays(tariff.Payment),
             ClientId = Guid.Parse(deliveryTariffAddDto.ClientId),

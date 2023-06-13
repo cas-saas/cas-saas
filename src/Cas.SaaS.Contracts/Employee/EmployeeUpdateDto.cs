@@ -3,9 +3,9 @@ using Cas.SaaS.Models;
 namespace Cas.SaaS.Contracts.Employee;
 
 /// <summary>
-/// Модель вывода деталей сотрудника
+/// Модель вывода клиента
 /// </summary>
-public class EmployeeDetailDto
+public class EmployeeUpdateDto
 {
     /// <summary>
     /// Идентификатор сотрудника
@@ -13,12 +13,12 @@ public class EmployeeDetailDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Номер телефона
+    /// Номер телефона пользователя
     /// </summary>
     public string Phone { get; set; } = string.Empty;
 
     /// <summary>
-    /// Почтовый адрес
+    /// Почтовый адрес пользователя
     /// </summary>
     public string Email { get; set; } = string.Empty;
 
@@ -36,9 +36,4 @@ public class EmployeeDetailDto
     /// Отчество
     /// </summary>
     public string? Patronymic { get; set; }
-
-    /// <summary>
-    /// Активен ли сотрудник
-    /// </summary>
-    public bool IsActive { get; set; }
 }

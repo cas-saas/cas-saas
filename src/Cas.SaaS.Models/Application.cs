@@ -11,6 +11,11 @@ public class Application
     public Guid Id { get; set; }
 
     /// <summary>
+    /// Номер заявки
+    /// </summary>
+    public string NumberApplication { get; set; } = string.Empty;
+
+    /// <summary>
     /// Название организации
     /// </summary>
     public string Title { get; set; } = string.Empty;

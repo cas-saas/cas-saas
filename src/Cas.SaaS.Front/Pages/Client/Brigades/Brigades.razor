@@ -1,0 +1,112 @@
+﻿@page "/brigades"
+@using Cas.SaaS.Contracts.Brigade;
+@using Cas.SaaS.Shared;
+@using Microsoft.AspNetCore.Authorization;
+@inject Helpers.HttpClientHelper Http
+@attribute [Authorize(Roles = "Client")]
+
+<PageTitle>Наряды</PageTitle>
+
+<h1>Список нарядов</h1>
+
+<div class="form-group">
+    <a class="btn btn-success" href="brigade/create">Добавить наряд</a>
+</div>
+
+@if (brigades is null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+}
+else if (brigades.Count() <= 0)
+{
+    <div class="text-center">
+        <p>Список нарядов пуст!</p>
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Номер наряда</th>
+                <th>Статус</th>
+                <th>Дата начала работ</th>
+                <th>Дата окночания работ</th>
+                <th>Дата создания наряда</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var brigade in brigades)
+            {
+                <tr>
+                    <td>@brigade.NumberBrigade</td>
+                    <td>
+                        @switch (brigade.Status)
+                        {
+                            case Models.BrigadeStates.New:
+                                <span class="badge bg-primary">
+                                    Новая
+                                </span>
+                                break;
+
+                            case Models.BrigadeStates.InProgress:
+                                <span class="badge bg-warning">
+                                    В работе
+                                </span>
+                                break;
+
+                            case Models.BrigadeStates.CanceledByClient:
+                                <span class="badge bg-danger">
+                                    Отменена клиентом
+                                </span>
+                                break;
+
+                            case Models.BrigadeStates.RejectedByEmployee:
+                                <span class="badge bg-danger">
+                                    Отклонена сотрудником
+                                </span>
+                                break;
+
+                            case Models.BrigadeStates.Completed:
+                                <span class="badge bg-success">
+                                    Завершена
+                                </span>
+                                break;
+                        }
+                    </td>
+                    <td>@brigade.StartDate.Date</td>
+                    <td>
+                        @if (brigade.EndDate == DateTime.MinValue)
+                        {
+                            <a>-</a>
+                        }
+                        else
+                        {
+                            <a>@brigade.EndDate</a>
+                        }
+                    </td>
+                    <td>@brigade.CreatedDate</td>
+                    <th>
+                        <div class="row">
+                            <a href="/brigade/@brigade.Id/details" class="btn btn-info col text-white m-1">Детали</a>
+                        </div>
+                    </th>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private BrigadeDto[]? brigades;
+
+    protected override async Task OnInitializedAsync()
+    {
+        brigades = await Http.GetBrigadesAsync();
+    }
+}

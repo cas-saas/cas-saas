@@ -1,9 +1,9 @@
 namespace Cas.SaaS.Contracts.Service;
 
 /// <summary>
-/// Модель вывода услуги
+/// Модель обновления услуги
 /// </summary>
-public class ServiceDto
+public class ServiceUpdateDto
 {
     /// <summary>
     /// Идентификатор услуги
@@ -23,5 +23,5 @@ public class ServiceDto
     /// <summary>
     /// Необходимые инструменты для оказания услуги
     /// </summary>
-    public List<string> Tools { get; set; } = null!;
+    public List<Tool> Tools { get; set; } = new List<Tool>();
 }

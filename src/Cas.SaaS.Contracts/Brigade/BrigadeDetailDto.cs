@@ -1,9 +1,11 @@
-﻿namespace Cas.SaaS.Models;
+﻿using Cas.SaaS.Models;
+
+namespace Cas.SaaS.Contracts.Brigade;
 
 /// <summary>
-/// Модель наряда
+/// Модель вывода деталей наряда
 /// </summary>
-public class Brigade
+public class BrigadeDetailDto
 {
     /// <summary>
     /// Идентификатор наряда в системе
@@ -24,16 +26,6 @@ public class Brigade
     /// Идентификатор услуги
     /// </summary>
     public Guid ServiceId { get; set; }
-
-    /// <summary>
-    /// Оказываемая услуга
-    /// </summary>
-    public virtual Service Service { get; set; } = null!;
-
-    /// <summary>
-    /// Выездные сотрудники
-    /// </summary>
-    public virtual IEnumerable<Employee> Employees { get; set; } = new List<Employee>();
 
     /// <summary>
     /// Заказчик ФИО
