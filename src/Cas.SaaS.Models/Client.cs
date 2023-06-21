@@ -18,7 +18,7 @@ public class Client : User
     /// </summary>
     public virtual IEnumerable<Delivery> Deliveries { get; set; } = null!;
     /// <summary>
-    /// Список сотрудников клиента
+    /// Список услуг клиента
     /// </summary>
     public virtual IEnumerable<Service> Services { get; set; } = null!;
 }

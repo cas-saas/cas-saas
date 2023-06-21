@@ -31,9 +31,11 @@ public class HttpAuthHelper
     /// <returns></returns>
     public async Task<UserLoginResultDTO> LoginUser(UserLoginDto userLoginDTO)
     {
+        string text = string.Empty;
         try
         {
             var response = await _http.PostAsJsonAsync("api/Auth", userLoginDTO);
+            text = await response.Content.ReadAsStringAsync();
             var result = await response.Content.ReadFromJsonAsync<UserLoginResultDTO>();
             await _tokenService.SetToken(result.Token);
             _myAuthenticationStateProvider.StateChanged();
@@ -46,7 +48,7 @@ public class HttpAuthHelper
             return new UserLoginResultDTO
             {
                 Succeeded = false,
-                Message = "Sorry, we were unable to log you in at this time. Please try again shortly."
+                Message = text
             };
         }
     }

@@ -4,6 +4,7 @@
 @inject NavigationManager navigationManager
 @inject Helpers.HttpClientHelper Http
 @attribute [Authorize(Roles = "Client")]
+@inject NotificationService NotificationService
 
 <PageTitle>Добавление сотрудника</PageTitle>
 
@@ -62,11 +63,24 @@
         {
             // not success
             Console.WriteLine(body);
+            ShowNotificationError(body);
         }
     }
 
     private void Clear()
     {
         employeeAddDto = new EmployeeAddDto();
+    }
+
+    void ShowNotificationError(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Ошибка добавления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpAdminHelper Http
 @attribute [Authorize(Roles = "Admin")]
+@inject NotificationService NotificationService
 
 <PageTitle>Добавление клиента</PageTitle>
 
@@ -22,6 +23,8 @@
 else
 {
     <EditForm Model="clientAddDto" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
         <div class="form-group p-2">
             <label for="surname">Фамилия</label>
@@ -98,6 +101,7 @@ else
         {
             // not success
             Console.WriteLine(body);
+            ShowNotificationError(body);
         }
 
         statusAddClient = true;
@@ -106,5 +110,17 @@ else
     private void Clear()
     {
         clientAddDto = new ClientAddDto();
+    }
+
+    void ShowNotificationError(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Ошибка добавления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

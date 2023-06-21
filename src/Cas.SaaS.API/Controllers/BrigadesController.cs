@@ -1,5 +1,6 @@
 ﻿using Cas.SaaS.Contracts.Application;
 using Cas.SaaS.Contracts.Brigade;
+using Cas.SaaS.Contracts.Employee;
 using Cas.SaaS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +66,7 @@ public class BrigadesController : Controller
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetBrigadeDetail(Guid id)
     {
-        var brigade = await _context.Brigades.FirstOrDefaultAsync(item => item.Id == id);
+        var brigade = await _context.Brigades.Include(b => b.Employees).FirstOrDefaultAsync(item => item.Id == id);
         if (brigade is null)
             return NotFound("Наряд не найден!");
 
@@ -81,7 +82,17 @@ public class BrigadesController : Controller
             Description = brigade.Description,
             StartDate = brigade.StartDate,
             EndDate = brigade.EndDate,
-            CreatedDate = brigade.CreatedDate
+            CreatedDate = brigade.CreatedDate,
+            EmployeesId = brigade.Employees.Select(item => new EmployeeDetailDto
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Patronymic = item.Patronymic,
+                Surname = item.Surname,
+                Email = item.Email,
+                Phone = item.Phone,
+                IsActive = item.IsActive
+            }).ToList()
         };
 
         return Ok(brigadeDetail);

@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpAdminHelper Http
 @attribute [Authorize(Roles = "Admin")]
+@inject NotificationService NotificationService
 
 <PageTitle>Добавление тарифного плана</PageTitle>
 
@@ -20,6 +21,8 @@
 else
 {
     <EditForm Model="tariffPlanAddDto" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
         <div class="form-group p-2">
             <label for="title">Заголовок</label>
@@ -77,6 +80,7 @@ else
         {
             // not success
             Console.WriteLine(body);
+            ShowNotificationError(body);
         }
 
         statusAddTariff = true;
@@ -85,5 +89,17 @@ else
     private void Clear()
     {
         tariffPlanAddDto = new TariffPlanAddDto();
+    }
+
+    void ShowNotificationError(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Ошибка добавления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

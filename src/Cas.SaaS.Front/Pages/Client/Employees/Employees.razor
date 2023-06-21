@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpClientHelper Http
 @attribute [Authorize(Roles = "Client")]
+@inject NotificationService NotificationService
 
 <PageTitle>Сотрудники</PageTitle>
 
@@ -65,7 +66,20 @@ else
 
     public async Task EmployeeDeleteAsync(Guid id)
     {
-        await Http.DeleteEmployeeById(id);
+        var response = await Http.DeleteEmployeeById(id);
         await OnInitializedAsync();
+        ShowNotificationDelete($"Сотрудник №{response} удален!");
+    }
+
+    void ShowNotificationDelete(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Успех!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

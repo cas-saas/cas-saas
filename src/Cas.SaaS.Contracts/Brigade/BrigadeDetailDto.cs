@@ -1,4 +1,5 @@
-﻿using Cas.SaaS.Models;
+﻿using Cas.SaaS.Contracts.Employee;
+using Cas.SaaS.Models;
 
 namespace Cas.SaaS.Contracts.Brigade;
 
@@ -61,4 +62,9 @@ public class BrigadeDetailDto
     /// Дата создания
     /// </summary>
     public DateTime CreatedDate { get; set; }
+
+    /// <summary>
+    /// Ответственные за наряд
+    /// </summary>
+    public List<EmployeeDetailDto> EmployeesId { get; set; } = null!;
 }

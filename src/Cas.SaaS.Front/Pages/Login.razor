@@ -2,10 +2,14 @@
 @using Cas.SaaS.Contracts.User
 @inject Helpers.HttpAuthHelper Http
 @inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
 
 <PageTitle>Вход в систему</PageTitle>
 
 <EditForm Model="@userLoginDTO" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
@@ -67,8 +71,21 @@
         {
             var errors = new Dictionary<string, List<string>>();
             errors.Add("", new List<string> { result.Message });
+            ShowNotificationError(result.Message);
         }
 
         loggingIn = false;
+    }
+
+    void ShowNotificationError(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Ошибка входа!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

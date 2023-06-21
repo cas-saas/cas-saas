@@ -5,6 +5,7 @@
 @inject NavigationManager navigationManager
 @inject Helpers.HttpClientHelper Http
 @attribute [Authorize(Roles = "Client")]
+@inject NotificationService NotificationService
 
 <PageTitle>Обновления данных сотрудника</PageTitle>
 
@@ -111,6 +112,7 @@ else
         {
             // not success
             Console.WriteLine(body);
+            ShowNotificationError(body);
         }
 
         status = true;
@@ -119,5 +121,17 @@ else
     private void Clear()
     {
         employeeUpdateDto = new EmployeeUpdateDto();
+    }
+
+    void ShowNotificationError(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Ошибка обновления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

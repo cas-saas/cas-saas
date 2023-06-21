@@ -6,6 +6,7 @@
 @inject Helpers.HttpAdminHelper HttpAdmin
 @inject Helpers.HttpAuthHelper HttpAuth
 @attribute [Authorize(Roles = "Admin")]
+@inject NotificationService NotificationService
 
 <PageTitle>Оформление заказа клиенту</PageTitle>
 
@@ -22,6 +23,8 @@
 else
 {
     <EditForm Model="clientAddDeliveryDto" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
         <div class="form-group p-2">
             <div class="form-group">
@@ -85,6 +88,7 @@ else
         {
             // not success
             Console.WriteLine(body);
+            ShowNotificationError(body);
         }
 
         statusAddClient = true;
@@ -94,5 +98,17 @@ else
     {
         clientAddDeliveryDto = new DeliveryTariffAddDto();
         clientAddDeliveryDto.ClientId = userId.ToString();
+    }
+
+    void ShowNotificationError(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Ошибка добавления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

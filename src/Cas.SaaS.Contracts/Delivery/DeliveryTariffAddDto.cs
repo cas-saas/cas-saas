@@ -1,4 +1,6 @@
-﻿namespace Cas.SaaS.Contracts.Delivery;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Cas.SaaS.Contracts.Delivery;
 
 public class DeliveryTariffAddDto
 {
@@ -10,5 +12,6 @@ public class DeliveryTariffAddDto
     /// <summary>
     /// Идентификатор тариф
     /// </summary>
+    [Required(ErrorMessage = "Выберите тарифный план!")] 
     public string TariffPlanId { get; set; } = string.Empty;
 }

@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpAdminHelper Http
 @attribute [Authorize(Roles = "Admin")]
+@inject NotificationService NotificationService
 
 <PageTitle>Пользователи</PageTitle>
 
@@ -73,7 +74,20 @@ else
 
     public async Task UserDeleteAsync(Guid id)
     {
-        await Http.DeleteUserById(id);
+        var response = await Http.DeleteUserById(id);
         await OnInitializedAsync();
+        ShowNotificationDelete($"Пользователь №{response} удален!");
+    }
+
+    void ShowNotificationDelete(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Успех!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

@@ -1,5 +1,4 @@
-﻿using Cas.SaaS.Contracts.Auth;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Cas.SaaS.Contracts.User;
 
@@ -8,10 +7,10 @@ namespace Cas.SaaS.Contracts.User;
 /// </summary>
 public class UserLoginDto
 {
-    [Required]
+    [Required(ErrorMessage = "Введите логин!")]
     public string? Login { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Введите пароль!")]
     [DataType(DataType.Password)]
     public string? Password { get; set; }
 }

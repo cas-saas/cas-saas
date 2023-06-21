@@ -124,13 +124,29 @@ else
                         Дата окончания работ
                     </dt>
                     <dd class="col-sm-10">
-                        @brigadeDetailDto.EndDate
+                        @if (brigadeDetailDto.EndDate == DateTime.MinValue)
+                        {
+                            <a>-</a>
+                        }
+                        else
+                        {
+                            <a>@brigadeDetailDto.EndDate</a>
+                        }
                     </dd>
                     <dt class="col-sm-2">
                         Дата создания наряда
                     </dt>
                     <dd class="col-sm-10">
                         @brigadeDetailDto.CreatedDate
+                    </dd>
+                    <dt class="col-sm-2">
+                        Ответственные за наряд
+                    </dt>
+                    <dd class="col-sm-10">
+                        @foreach (var item in brigadeDetailDto.EmployeesId)
+                        {
+                            @($"{item.Surname} {item.Name} {item.Patronymic}; ")
+                        }
                     </dd>
                 </dl>
             </div>

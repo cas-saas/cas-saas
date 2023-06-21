@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Cas.SaaS.Contracts.Client;
 
 /// <summary>
@@ -18,21 +20,25 @@ public class ClientAddDto
     /// <summary>
     /// Номер телефона пользователя
     /// </summary>
+    [Required(ErrorMessage = "Введите номер телефона!")] 
     public string Phone { get; set; } = string.Empty;
 
     /// <summary>
     /// Почтовый адрес пользователя
     /// </summary>
+    [Required(ErrorMessage = "Введите почтовый адрес!")] 
     public string Email { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Имя
     /// </summary>
+    [Required(ErrorMessage = "Введите имя!")] 
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Фамилия
     /// </summary>
+    [Required(ErrorMessage = "Введите фамилию!")] 
     public string Surname { get; set; } = string.Empty;
 
     /// <summary>
