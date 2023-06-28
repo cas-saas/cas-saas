@@ -6,12 +6,15 @@
 @inject NavigationManager navigationManager
 @inject Helpers.HttpClientHelper Http
 @attribute [Authorize(Roles = "Client")]
+@inject NotificationService NotificationService
 
 <PageTitle>Добавление наряда</PageTitle>
 
 <h2>Добавление наряда</h2>
 
 <EditForm Model="brigadeAddDto" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
     <div class="form-group p-2">
         <label for="fio">ФИО заказчика</label>
@@ -111,16 +114,42 @@
             // success
             Console.WriteLine($"the id of the brigade is: {body}");
             navigationManager.NavigateTo("brigades");
+            ShowNotification(body);
         }
         else
         {
             // not success
             Console.WriteLine(body);
+            ShowNotificationError(body);
         }
     }
 
     private void Clear()
     {
         brigadeAddDto = new BrigadeAddDto();
+    }
+
+    void ShowNotificationError(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Ошибка добавления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
+    }
+
+    void ShowNotification(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Успех!",
+                Detail = "Наряд успешно создан!",
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
     }
 }

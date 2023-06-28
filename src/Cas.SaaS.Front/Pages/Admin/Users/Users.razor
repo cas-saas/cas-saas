@@ -1,5 +1,6 @@
 ﻿@page "/admin/users"
 @using Cas.SaaS.Contracts.User;
+@using Cas.SaaS.Shared;
 @using Microsoft.AspNetCore.Authorization;
 @inject Helpers.HttpAdminHelper Http
 @attribute [Authorize(Roles = "Admin")]
@@ -50,7 +51,7 @@ else
                     <td>@user.FIO</td>
                     <td>@user.Phone</td>
                     <td>@user.Email</td>
-                    <td>@user.Role</td>
+                    <td>@user.Role.GetDisplayName()</td>
                     <th>
                         <div class="row">
                             <a href="/admin/user/@user.Id/update" class="btn btn-primary col m-1">Обновить</a>
@@ -85,7 +86,7 @@ else
             {
                 Severity = NotificationSeverity.Success,
                 Summary = "Успех!",
-                Detail = text,
+                Detail = "Клиент добавлен в систему!",
                 Duration = 8000
             };
         NotificationService.Notify(message);

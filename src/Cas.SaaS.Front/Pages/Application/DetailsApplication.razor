@@ -1,5 +1,6 @@
 ﻿@page "/application/{applicationId:guid}"
 @using Cas.SaaS.Contracts.Application;
+@using Cas.SaaS.Shared;
 @inject NavigationManager navigationManager
 @inject Helpers.HttpAuthHelper Http
 
@@ -33,7 +34,7 @@ else
                 Статус заявки
             </dt>
             <dd class="col-sm-10">
-                @application.Status
+                @application.Status.GetDisplayName()
             </dd>
             <dt class="col-sm-2">
                 Название организации

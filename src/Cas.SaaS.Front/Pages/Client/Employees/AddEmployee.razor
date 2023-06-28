@@ -11,6 +11,8 @@
 <h2>Добавление сотрудника</h2>
 
 ﻿<EditForm Model="employeeAddDto" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
     <div class="form-group p-2">
         <label for="surname">Фамилия</label>
@@ -58,6 +60,7 @@
             // success
             Console.WriteLine($"the id of the user is: {body}");
             navigationManager.NavigateTo("employees");
+            ShowNotification(body);
         }
         else
         {
@@ -78,6 +81,18 @@
             {
                 Severity = NotificationSeverity.Error,
                 Summary = "Ошибка добавления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
+    }
+
+    void ShowNotification(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Успех!",
                 Detail = text,
                 Duration = 8000
             };

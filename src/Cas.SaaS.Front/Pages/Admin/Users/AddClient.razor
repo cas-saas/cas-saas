@@ -96,6 +96,7 @@ else
             // success
             Console.WriteLine($"the id of the user is: {body}");
             navigationManager.NavigateTo("/admin/users");
+            ShowNotification(body);
         }
         else
         {
@@ -118,6 +119,18 @@ else
             {
                 Severity = NotificationSeverity.Error,
                 Summary = "Ошибка добавления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
+    }
+
+    void ShowNotification(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Успех!",
                 Detail = text,
                 Duration = 8000
             };

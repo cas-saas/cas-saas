@@ -11,6 +11,8 @@
 <h2>Добавление услуги</h2>
 
 ﻿<EditForm Model="serviceAddDto" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
     <div class="form-group p-2">
         <label for="name">Название услуги</label>
@@ -77,6 +79,7 @@
             // success
             Console.WriteLine($"the id of the service is: {body}");
             navigationManager.NavigateTo("services");
+            ShowNotification(body);
         }
         else
         {
@@ -122,6 +125,18 @@
             {
                 Severity = NotificationSeverity.Error,
                 Summary = "Ошибка добавления!",
+                Detail = text,
+                Duration = 8000
+            };
+        NotificationService.Notify(message);
+    }
+
+    void ShowNotification(string text)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Успех!",
                 Detail = text,
                 Duration = 8000
             };

@@ -65,6 +65,17 @@ public class DatabaseContext : DbContext
                 Email = "pmarkelo77@gmail.com",
                 Name = "Павел",
                 Surname = "Маркелов",
+            },
+            new User
+            {
+                Id = Guid.NewGuid(),
+                Role = UserRoles.Client,
+                Login = "client",
+                Password = "client",
+                Phone = "79887774433",
+                Email = "pmarkelo77@gmail.com",
+                Name = "Джонатан",
+                Surname = "Муерто",
             });
         });
 
